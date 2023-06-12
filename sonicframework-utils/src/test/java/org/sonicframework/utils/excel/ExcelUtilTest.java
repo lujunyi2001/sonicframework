@@ -1,0 +1,117 @@
+package org.sonicframework.utils.excel;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.Test;
+import org.sonicframework.utils.PageQuerySupport;
+import org.sonicframework.utils.excel.ExcelUtil;
+import org.sonicframework.utils.mapper.MapperContext;
+
+import org.sonicframework.context.dto.DictCodeDto;
+import org.sonicframework.utils.dto.TestDto;
+
+/**
+* @author lujunyi
+*/
+public class ExcelUtilTest {
+
+	public ExcelUtilTest() {
+	}
+	
+	@Test
+	public void export() {
+		MapperContext<TestDto> context = MapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
+		context.setGroups(ExcelUtil.class);
+		final List<TestDto> list = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			list.add(buildTestDto(i));
+		}
+		PageQuerySupport<TestDto> pageSupport = new PageQuerySupport<TestDto>() {
+			
+			@Override
+			public int getPages() {
+				return 1;
+			}
+			
+			@Override
+			public List<TestDto> getPageContent(int pageNum) {
+				return list;
+			}
+		};
+		Sheet sheet = ExcelUtil.export(context, pageSupport);
+		try(OutputStream out = new FileOutputStream("E:/test-data/export/testexp.xlsx")) {
+			sheet.getWorkbook().write(out);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@Test
+	public void testImport() {
+		MapperContext<TestDto> context = MapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
+		context.setGroups(ExcelUtil.class);
+		context.setValidEnable(true);
+		try(InputStream input = new FileInputStream("E:/test-data/export/testexp.xlsx")) {
+			Workbook workbook = ExcelUtil.openExcel(input, "testexp.xlsx");
+			Sheet sheet = workbook.getSheetAt(0);
+			ExcelUtil.importForEntity(sheet, context, (t, r)->{
+				System.out.println(r);
+				System.out.println(t);
+			}, (t, o)->{
+				System.out.println(o.getSheetName() + "  " + o.getSheetIndex() + "  " + o.getRowIndex() + "  " + o.getDataMap());
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
+	@Test
+	public void importForMap() {
+		try(InputStream input = new FileInputStream("E:/test-data/export/testexp.xlsx")) {
+			Workbook workbook = ExcelUtil.openExcel(input, "testexp.xlsx");
+			Sheet sheet = workbook.getSheetAt(0);
+			List<Map<String, Object>> list = ExcelUtil.importForMap(sheet);
+			for (Map<String, Object> map : list) {
+				System.out.println(map);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
+	private TestDto buildTestDto(int num) {
+		TestDto dto = new TestDto();
+		dto.setDat(new Date());
+		dto.setDou(new Double(num));
+		dto.setExt1("ext1" + num);
+		dto.setExt2("ext2" + num);
+		dto.setGeoStr("POINT(1 1)");
+		dto.setStr("代码" + (num % 6));
+		dto.setSplitStr("代码2,代码3,代码4");
+		return dto;
+	}
+	
+	private List<DictCodeDto> getDictList(String type){
+		List<DictCodeDto> list = new ArrayList<>();
+		for (int i = 0; i < 6; i++) {
+			DictCodeDto dto = new DictCodeDto();
+			dto.setId(String.valueOf(i));
+			dto.setCode("代码" + i);
+			dto.setValue("名称" + i);
+			list.add(dto);
+		}
+		return list;
+	}
+
+}
