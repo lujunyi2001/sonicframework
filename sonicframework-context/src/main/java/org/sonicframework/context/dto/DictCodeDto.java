@@ -1,5 +1,7 @@
 package org.sonicframework.context.dto;
 
+import java.util.List;
+
 import org.sonicframework.context.exception.DataNotValidException;
 
 /**
@@ -60,6 +62,10 @@ public class DictCodeDto extends BaseDto implements Cloneable{
 	 * 字典描述
 	 */
 	private String desc;
+	/**
+	 * 子节点
+	 */
+	private List<DictCodeDto> children;
 	
 	public String getId() {
 		return id;
@@ -146,5 +152,11 @@ public class DictCodeDto extends BaseDto implements Cloneable{
 	}
 	public void setParam5(String param5) {
 		this.param5 = param5;
+	}
+	public List<DictCodeDto> getChildren() {
+		return children;
+	}
+	public void setChildren(List<DictCodeDto> children) {
+		this.children = children;
 	}
 }
