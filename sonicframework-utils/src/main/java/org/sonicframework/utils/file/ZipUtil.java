@@ -202,6 +202,11 @@ public class ZipUtil {
 												// next entry
 					bInStream.close(); // 关闭
 					inStream.close();
+				}else {
+					File[] listFiles = inputFile.listFiles();
+					for (int i = 0; i < listFiles.length; i++) {
+						zipFile(listFiles[i], name + File.separator + listFiles[i].getName(), outputstream);
+					}
 				}
 			} else {
 				throw new RuntimeException("文件不存在！");
