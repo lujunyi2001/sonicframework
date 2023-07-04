@@ -1,6 +1,6 @@
 package org.sonicframework.core.webapi.provider;
 
-import org.sonicframework.core.config.LandtoolframeworkConfig;
+import org.sonicframework.core.config.SonicframeworkConfig;
 import org.sonicframework.core.webapi.service.WebApiResultApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,7 +15,7 @@ import org.sonicframework.utils.ClassUtil;
 public class DefaultWebApiResultApplyServiceImpl implements WebApiResultApplyService<ResultDto> {
 
 	@Autowired
-	private LandtoolframeworkConfig frameworkConfig;
+	private SonicframeworkConfig frameworkConfig;
 	
 	public DefaultWebApiResultApplyServiceImpl() {
 	}

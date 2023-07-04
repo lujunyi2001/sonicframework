@@ -23,7 +23,7 @@ public class CorsAppConfig {
 	}
 	
 	@Bean
-	@ConditionalOnProperty(prefix = "landtoolframework.corss-origin", name = "enable", havingValue = "true", matchIfMissing = false)
+	@ConditionalOnProperty(prefix = "sonicframework.corss-origin", name = "enable", havingValue = "true", matchIfMissing = false)
     public CorsFilter corsFilter(CorssOriginConfig corssOriginConfig) {
 		List<String> mapprings = corssOriginConfig.getMappring();
 		List<String> allowedOrigins = corssOriginConfig.getAllowedOrigins();

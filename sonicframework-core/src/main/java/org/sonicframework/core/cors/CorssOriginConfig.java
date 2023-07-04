@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("landtoolframework.corss-origin")
+@ConfigurationProperties("sonicframework.corss-origin")
 public class CorssOriginConfig {
 
 	private boolean enable = false;

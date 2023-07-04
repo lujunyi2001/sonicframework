@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("landtoolframework.webapi")
+@ConfigurationProperties("sonicframework.webapi")
 public class WebApiConfig {
 
 	private boolean returnUnifiedResult = true;

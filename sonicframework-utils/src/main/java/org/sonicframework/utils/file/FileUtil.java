@@ -44,7 +44,7 @@ public class FileUtil {
 	public static String getTmpDirRelativePath() {
 		DateFormat format = new SimpleDateFormat("yyyyMMdd");
 		String dateStr = format.format(new Date());
-		return "landtool/" + dateStr + SEP;
+		return "sonic/" + dateStr + SEP;
 	}
 	
 	public static File uploadTmpDir(MultipartFile file) {
@@ -201,7 +201,7 @@ public class FileUtil {
 	}
 	
 	public static URL findInitCodeUrl(String fileName) throws MalformedURLException {
-		String basePath = System.getProperty("landtool.initCode.path");
+		String basePath = System.getProperty("sonic.initCode.path");
 		if(StringUtils.isNotBlank(basePath)) {
 			File dic = new File(basePath);
 			if(dic.exists() && dic.isDirectory()) {
@@ -216,7 +216,7 @@ public class FileUtil {
 	}
 	
 	public static File buildTempFile(String extendName) {
-		File file = new File(getTmpDir() + "landtool/" + UUID.randomUUID().toString() + EXTEND_SEP + extendName);
+		File file = new File(getTmpDir() + "sonic/" + UUID.randomUUID().toString() + EXTEND_SEP + extendName);
 		if(!file.getParentFile().exists()) {
 			file.getParentFile().mkdirs();
 		}
