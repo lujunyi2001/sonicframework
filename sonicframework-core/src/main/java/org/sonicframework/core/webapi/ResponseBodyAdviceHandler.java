@@ -56,7 +56,7 @@ public class ResponseBodyAdviceHandler<T> implements ResponseBodyAdvice<Object> 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
 		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
-		ResponseResult responseResult = (ResponseResult) attributes.getRequest().getAttribute(ResponseResultHandlerInterceptor.LANDTOOL_FRAMEWORK_RESPONSE_RESULT_SUPPORT);
+		ResponseResult responseResult = (ResponseResult) attributes.getRequest().getAttribute(ResponseResultHandlerInterceptor.sonic_FRAMEWORK_RESPONSE_RESULT_SUPPORT);
 		return responseResult != null;
 	}
 

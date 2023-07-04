@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 /**
  * @author lujunyi
  */
-@Aspect
-@Component
-@Order(Integer.MAX_VALUE - 1)
+//@Aspect
+//@Component
+//@Order(Integer.MAX_VALUE - 1)
 public class ServiceLogAspect {
 
 
@@ -24,7 +24,7 @@ public class ServiceLogAspect {
     
 	private static final Logger logger = LoggerFactory.getLogger(ServiceLogAspect.class);
 
-	@Pointcut("execution(public * com.landtool..*.*(..)) || execution(public * test..*.*(..))")
+	@Pointcut("execution(public * com..*.*(..)) || execution(public * org..*.*(..)) || execution(public * test..*.*(..))")
 	public void logPointCut() {
 
 	}

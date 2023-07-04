@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("landtoolframework.encrypt")
+@ConfigurationProperties("sonicframework.encrypt")
 public class EncryptConfig {
 
 	private boolean enable = false;

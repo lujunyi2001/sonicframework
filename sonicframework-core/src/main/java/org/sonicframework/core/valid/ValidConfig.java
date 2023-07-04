@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("landtoolframework.valid")
+@ConfigurationProperties("sonicframework.valid")
 public class ValidConfig {
 
 	private boolean failfast = false;

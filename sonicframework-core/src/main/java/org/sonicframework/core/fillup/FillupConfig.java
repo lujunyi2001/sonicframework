@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("landtoolframework.fillup")
+@ConfigurationProperties("sonicframework.fillup")
 public class FillupConfig {
 
 	private boolean enable = true;

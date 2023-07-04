@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("landtoolframework.sensitization")
+@ConfigurationProperties("sonicframework.sensitization")
 public class SensitizationConfig {
 
 	private boolean enable = true;

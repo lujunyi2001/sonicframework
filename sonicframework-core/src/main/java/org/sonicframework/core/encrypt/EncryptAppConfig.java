@@ -37,7 +37,7 @@ public class EncryptAppConfig<T> {
 	}
 	
 	@Bean
-	@ConditionalOnProperty(prefix = "landtoolframework.encrypt", name = "enable", havingValue = "true", matchIfMissing = false)
+	@ConditionalOnProperty(prefix = "sonicframework.encrypt", name = "enable", havingValue = "true", matchIfMissing = false)
     public FilterRegistrationBean<DecryptFilter<T>> decryptFilter(){
     	FilterRegistrationBean<DecryptFilter<T>> filterRegBean = new FilterRegistrationBean<>();
     	DecryptFilter<T> decryptFilter = new DecryptFilter<>(this.encryptConfig, this.rsakeyProvider);

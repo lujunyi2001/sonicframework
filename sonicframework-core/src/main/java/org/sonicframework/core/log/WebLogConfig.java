@@ -9,12 +9,14 @@ import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
-@ConfigurationProperties("landtoolframework.weblog")
+@ConfigurationProperties("sonicframework.weblog")
 public class WebLogConfig {
 
 	private boolean enableAroundLog = true;
 	private boolean enableSystemLog = true;
 	private boolean enableServiceLog = false;
+	
+	private List<Class<?>> excludeException;
 	
 	private List<String> skipRequestParam = new ArrayList<>(Arrays.asList("password", "confirmPassword"));
 	
@@ -51,6 +53,14 @@ public class WebLogConfig {
 
 	public void setEnableServiceLog(boolean enableServiceLog) {
 		this.enableServiceLog = enableServiceLog;
+	}
+
+	public List<Class<?>> getExcludeException() {
+		return excludeException;
+	}
+
+	public void setExcludeException(List<Class<?>> excludeException) {
+		this.excludeException = excludeException;
 	}
 
 }

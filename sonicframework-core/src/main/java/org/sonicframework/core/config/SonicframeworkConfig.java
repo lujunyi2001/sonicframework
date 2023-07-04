@@ -4,12 +4,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("landtoolframework")
-public class LandtoolframeworkConfig {
+@ConfigurationProperties("sonicframework")
+public class SonicframeworkConfig {
 
 	private boolean debug = false;
 	
-	public LandtoolframeworkConfig() {
+	public SonicframeworkConfig() {
 	}
 
 	public boolean isDebug() {

@@ -27,7 +27,7 @@ public class ResponseResultHandlerInterceptor<T> implements HandlerInterceptor {
 	private WebApiResultApplyService<T> resultApplyService;
 	
 	private ConcurrentHashMap<Method, ResponseResult> apiCacheMap = new ConcurrentHashMap<>(256);
-	public final static String LANDTOOL_FRAMEWORK_RESPONSE_RESULT_SUPPORT = "LANDTOOL_FRAMEWORK_RESPONSE_RESULT_SUPPORT";
+	public final static String sonic_FRAMEWORK_RESPONSE_RESULT_SUPPORT = "sonic_FRAMEWORK_RESPONSE_RESULT_SUPPORT";
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
@@ -57,9 +57,9 @@ public class ResponseResultHandlerInterceptor<T> implements HandlerInterceptor {
 			}
 			
 			if(responseResult != null) {
-				request.setAttribute(LANDTOOL_FRAMEWORK_RESPONSE_RESULT_SUPPORT, responseResult);
+				request.setAttribute(sonic_FRAMEWORK_RESPONSE_RESULT_SUPPORT, responseResult);
 			}else {
-				request.removeAttribute(LANDTOOL_FRAMEWORK_RESPONSE_RESULT_SUPPORT);
+				request.removeAttribute(sonic_FRAMEWORK_RESPONSE_RESULT_SUPPORT);
 			}
 		}
 		return true;

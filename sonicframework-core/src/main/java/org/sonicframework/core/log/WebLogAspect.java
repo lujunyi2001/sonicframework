@@ -146,6 +146,10 @@ public class WebLogAspect {
 		} catch (Throwable e) {
 			systemLogDto = SystemLogHelper.fillAndValidResult(systemLogDto, null, e, startTime);
 			SystemLogHelper.fillLogUserInfo(systemLogDto, user);
+			boolean ignoreException = ignoreException(e);
+			if(ignoreException) {
+				systemLogDto = null;
+			}
 			if(webLogConfig.isEnableAroundLog() && logger.isErrorEnabled()) {
 	        	logger.error(LOG_ERROR_FORMAT, 
 	        			requestId, 
@@ -154,7 +158,7 @@ public class WebLogAspect {
 	        			Arrays.toString(getParamValues(pjp, skipWebLog)), 
 	        			e, 
 	        			(System.currentTimeMillis() - startTime));
-	        	if(!(e instanceof BaseBizException)) {
+	        	if(!(e instanceof BaseBizException) && !ignoreException) {
 		        	logger.error(e.toString(), e);
 	        	}
 	        }
@@ -165,6 +169,19 @@ public class WebLogAspect {
 			saveSystemLog(systemLogDto);
 		}
         return ob;
+    }
+    
+    private boolean ignoreException(Throwable e) {
+    	if(e instanceof BaseBizException) {
+    		return true;
+    	}
+    	if(webLogConfig.getExcludeException() != null) {
+    		boolean anyMatch = webLogConfig.getExcludeException().stream().anyMatch(t->t.isAssignableFrom(e.getClass()));
+    		if(anyMatch) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
     private SkipWebLog findSkipWebLog(ProceedingJoinPoint pjp) {
