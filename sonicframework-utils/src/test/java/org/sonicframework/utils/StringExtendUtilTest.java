@@ -1,7 +1,6 @@
 package org.sonicframework.utils;
 
 import org.junit.Test;
-import org.sonicframework.utils.StringExtendUtil;
 
 /**
 * @author lujunyi

@@ -2,20 +2,24 @@ package org.sonicframework.core.config;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.Filter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sonicframework.core.webapi.ResponseResultHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -39,8 +43,13 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
@@ -52,6 +61,8 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 
 	@Autowired
 	private ResponseResultHandlerInterceptor<?> responseResultHandlerInterceptor;
+	@Autowired
+	private WebConfig webConfig;
 	
 	@Override
 	public void configurePathMatch(PathMatchConfigurer configurer) {
@@ -71,6 +82,24 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
+		registry.addFormatterForFieldType(String.class, new Formatter<String>() {
+
+			@Override
+			public String print(String object, Locale locale) {
+				return object;
+			}
+
+			@Override
+			public String parse(String text, Locale locale) throws ParseException {
+				if(webConfig.isArgumentBlankToNull() && StringUtils.isBlank(text)) {
+					return null;
+				}
+				if(webConfig.isArgumentTrim() && text != null) {
+					return StringUtils.trim(text);
+				}
+				return text;
+			}
+		});
 	}
 
 	@Override
@@ -130,6 +159,27 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 		SimpleModule simpleModule = new SimpleModule();
 		simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
 		simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
+		
+		if(webConfig.isArgumentBlankToNull() || webConfig.isArgumentTrim()) {
+			simpleModule.addDeserializer(String.class, new StdDeserializer<String>(String.class) {
+				private static final long serialVersionUID = 1602849816560031153L;
+
+				@Override
+				public String deserialize(JsonParser p, DeserializationContext ctxt)
+						throws IOException, JsonProcessingException {
+					String text = StringDeserializer.instance.deserialize(p, ctxt);
+					if(webConfig.isArgumentBlankToNull() && StringUtils.isBlank(text)) {
+						return null;
+					}
+					if(webConfig.isArgumentTrim() && text != null) {
+						return StringUtils.trim(text);
+					}
+					return text;
+				}
+			});
+		}
+		
+		
 		objectMapper.registerModule(simpleModule);
 		// 时间格式化
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.junit.Test;
-import org.sonicframework.utils.ClassUtil;
 
 /**
 * @author lujunyi

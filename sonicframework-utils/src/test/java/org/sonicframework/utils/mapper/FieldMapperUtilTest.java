@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.sonicframework.utils.mapper.FieldMapperUtil;
-import org.sonicframework.utils.mapper.MapperContext;
-import org.sonicframework.utils.mapper.MapperDescVo;
 
 import org.sonicframework.context.dto.DictCodeDto;
 import org.sonicframework.utils.dto.TestDto;
