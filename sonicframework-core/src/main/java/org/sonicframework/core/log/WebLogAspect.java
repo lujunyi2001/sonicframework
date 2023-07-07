@@ -98,7 +98,8 @@ public class WebLogAspect {
         			request.getMethod(), 
         			request.getRemoteAddr(), 
         			user, 
-        			ServletUtil.getParameterMap(request, skipParamSet));
+        			ServletUtil.getParameterMap(request, skipParamSet), 
+        			SystemLogHelper.getRequestBodyContent(request));
         }
         
         SystemLog systemLog = findSystemLog(pjp);

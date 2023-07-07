@@ -2,6 +2,7 @@ package org.sonicframework.core.log;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -228,11 +229,16 @@ public class SystemLogHelper {
     	}
 	}
 	
-	private static String getRequestBodyContent(ServletRequest request) {
+	public static String getRequestBodyContent(ServletRequest request) {
     	if(Objects.equals("application/json", request.getContentType())) {
     		if(request instanceof ContentCachingRequestWrapper) {
     			ContentCachingRequestWrapper requestWrapper = (ContentCachingRequestWrapper) request;
-    			String requestBody = new String(requestWrapper.getContentAsByteArray());
+    			String requestBody;
+				try {
+					requestBody = new String(requestWrapper.getContentAsByteArray(), "utf-8");
+				} catch (UnsupportedEncodingException e) {
+					requestBody = new String(requestWrapper.getContentAsByteArray());
+				}
         		return requestBody;
     		}else {
     			return "[UNKNOWM]";
