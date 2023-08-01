@@ -16,6 +16,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface Match {
+	/** 匹配期望值 */
 	String key();
+	/** 匹配替换值 */
 	String val();
 }

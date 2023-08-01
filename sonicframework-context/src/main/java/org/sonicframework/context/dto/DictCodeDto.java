@@ -5,9 +5,10 @@ import java.util.List;
 import org.sonicframework.context.exception.DataNotValidException;
 
 /**
-* @author lujunyi
-*/
-public class DictCodeDto extends BaseDto implements Cloneable{
+ * 数据字典模型
+ * @author lujunyi
+ */
+public class DictCodeDto extends BaseDto implements Cloneable {
 
 	private static final long serialVersionUID = -951174762682382675L;
 	/**
@@ -66,74 +67,95 @@ public class DictCodeDto extends BaseDto implements Cloneable{
 	 * 子节点
 	 */
 	private List<DictCodeDto> children;
-	
+
 	public String getId() {
 		return id;
 	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
+
 	public String getPcode() {
 		return pcode;
 	}
+
 	public void setPcode(String pcode) {
 		this.pcode = pcode;
 	}
+
 	public String getType() {
 		return type;
 	}
+
 	public void setType(String type) {
 		this.type = type;
 	}
+
 	public String getCode() {
 		return code;
 	}
+
 	public void setCode(String code) {
 		this.code = code;
 	}
+
 	public String getValue() {
 		return value;
 	}
+
 	public void setValue(String value) {
 		this.value = value;
 	}
+
 	public int getSort() {
 		return sort;
 	}
+
 	public void setSort(int sort) {
 		this.sort = sort;
 	}
+
 	public boolean isDeleted() {
 		return deleted;
 	}
+
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;
 	}
+
 	public String getDesc() {
 		return desc;
 	}
+
 	public void setDesc(String desc) {
 		this.desc = desc;
 	}
+
 	public String getParam1() {
 		return param1;
 	}
+
 	public void setParam1(String param1) {
 		this.param1 = param1;
 	}
+
 	public String getParam2() {
 		return param2;
 	}
+
 	public void setParam2(String param2) {
 		this.param2 = param2;
 	}
+
 	public String getParam3() {
 		return param3;
 	}
+
 	public void setParam3(String param3) {
 		this.param3 = param3;
 	}
-	
+
 	public DictCodeDto cloneObj() {
 		try {
 			return (DictCodeDto) super.clone();
@@ -141,21 +163,27 @@ public class DictCodeDto extends BaseDto implements Cloneable{
 			throw new DataNotValidException("clone DictCodeDto 失败");
 		}
 	}
+
 	public String getParam4() {
 		return param4;
 	}
+
 	public void setParam4(String param4) {
 		this.param4 = param4;
 	}
+
 	public String getParam5() {
 		return param5;
 	}
+
 	public void setParam5(String param5) {
 		this.param5 = param5;
 	}
+
 	public List<DictCodeDto> getChildren() {
 		return children;
 	}
+
 	public void setChildren(List<DictCodeDto> children) {
 		this.children = children;
 	}

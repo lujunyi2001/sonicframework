@@ -294,7 +294,7 @@ public class ExcelUtil {
 	 * 通过字段映射上下文获取sheet数据
 	 * @param sheet Sheet页
 	 * @param context 字段映射上下文
-	 * @param consumer 实体类生产者
+	 * @param consumer 导入模型消费者
 	 */
 	public static <T> void importForEntity(Sheet sheet, MapperContext<T> context,
 			ConsumerImpEntity<T, ValidateResult> consumer) {
@@ -305,7 +305,7 @@ public class ExcelUtil {
 	 * 通过字段映射上下文获取sheet数据
 	 * @param sheet Sheet页
 	 * @param context 字段映射上下文
-	 * @param consumer 实体类生产者
+	 * @param consumer 导入模型消费者
 	 * @param postMapper 实体类映射后置方法
 	 */
 	public static <T> void importForEntity(Sheet sheet, MapperContext<T> context,

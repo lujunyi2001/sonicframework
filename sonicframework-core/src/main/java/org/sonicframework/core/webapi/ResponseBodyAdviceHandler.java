@@ -48,7 +48,7 @@ import org.sonicframework.context.webapi.dto.ResultDto;
 public class ResponseBodyAdviceHandler<T> implements ResponseBodyAdvice<Object> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ResponseBodyAdviceHandler.class);
-	@Value("${spring.servlet.multipart.max-file-size:50MB}")
+	@Value("${spring.servlet.multipart.max-file-size:1MB}")
 	private String uploadMax;
 	@Autowired
 	private WebApiResultApplyService<T> webApiResultApplyService;

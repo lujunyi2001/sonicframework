@@ -224,14 +224,14 @@ public class ZipUtil {
 			fis.read(buffer);
 			fis.close();
 			// 清空response
-			response.reset();
+//			response.reset();
 
 			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
 
 			// 设置response的Header
 			String fileName = new String(file.getName().getBytes(), "ISO-8859-1");
-			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
-			response.addHeader("Content-Length", "" + file.length());
+			response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+			response.setHeader("Content-Length", "" + file.length());
 			response.setContentType("application/octet-stream");
 
 			toClient.write(buffer);
