@@ -242,7 +242,7 @@ public class ExportGdb<T> {
 		if (geoValue != null && geoValue instanceof Geometry) {
 			geo = (Geometry) geoValue;
 			geoStr = GeometryUtil.writeGeometry((Geometry) geoValue);
-		} else if (geoValue != null && geoValue instanceof Geometry) {
+		} else if (geoValue != null && geoValue instanceof String) {
 			geo = GeometryUtil.readGeometry((String) geoValue);
 			geoStr = (String) geoValue;
 		}
