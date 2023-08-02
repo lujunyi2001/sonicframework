@@ -665,7 +665,7 @@ context.setValidEnable(true);
 
 #### 导入导出gdb
 ##### 安装依赖
-需要安装gdal环境，并依赖gdal.jar
+需要安装gdal环境，支持操作“FileGDB”，并依赖gdal.jar
 pom需要添加依赖
 ``` xml
 <dependency>

@@ -29,6 +29,7 @@
 		<module>sonicframework-context</module>
 		<module>sonicframework-utils</module>
 		<module>sonicframework-utils-geo</module>
+		<module>sonicframework-utils-gdb</module>
 		<module>sonicframework-core</module>
 	</modules>
 	
