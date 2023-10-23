@@ -695,9 +695,9 @@ context.setValidEnable(true);
 
 ##### 导入gdb
 1. 定义GeoMapperContext
-2. 调用GeoMapperContext的setMapperName方法设置图层的名称。;
+2. 调用GeoMapperContext的setMapperName方法设置图层的名称。
 3. 调用org.sonicframework.utils.gdb.GdbUtil的extractInfoEntity方法解析shp文件，方法参数如下:
-- **path:** String类型，shp文件路径，如果path为目录，则解析该目录下所有shp文件
+- **path:** String类型，gdb文件路径，目录名以.gdb结尾
 - **context:** org.sonicframework.utils.geometry.mapper.GeoMapperContext类型字段映射上下文，字段映射上下文
 - **consumer:** org.sonicframework.utils.ConsumerImpEntity类型，导入模型消费者。具体描述如下
     - t: 导入后的数据模型
@@ -728,6 +728,6 @@ context.setValidEnable(true);
 - **layerName:** String类型，图层名
 - **context:** org.sonicframework.utils.geometry.mapper.GeoMapperContext类型字段映射上下文，字段映射上下文
 - **geoKey:** String类型，数据模型中空间数据的映射名
-3. 调用writePageData方法写入数据，参数为org.sonicframework.utils.PageQuerySupport类型，也可以调用write方法写入单条数据
-4. 调用close方法关闭写入
-5. 调用downloadZipAndDelete方法压缩下载并删除源文件，参数为javax.servlet.http.HttpServletResponse类型
+4. 调用writePageData方法写入数据，参数为org.sonicframework.utils.PageQuerySupport类型，也可以调用write方法写入单条数据
+5. 调用close方法关闭写入
+6. 调用downloadZipAndDelete方法压缩下载并删除源文件，参数为javax.servlet.http.HttpServletResponse类型

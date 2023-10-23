@@ -10,14 +10,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.jackrabbit.uuid.UUID;
 import org.junit.Test;
-import org.sonicframework.utils.gdb.ExportGdb;
-import org.sonicframework.utils.gdb.GdbUtil;
 
 import org.sonicframework.context.dto.DictCodeDto;
 import org.sonicframework.utils.dto.TestDto;
 import org.sonicframework.utils.geometry.ExportErrorPolicy;
-import org.sonicframework.utils.geometry.ExportShp;
 import org.sonicframework.utils.geometry.ShapeUtil;
+import org.sonicframework.utils.geometry.mapper.GeoMapperContext;
 import org.sonicframework.utils.mapper.FieldMapperUtil;
 import org.sonicframework.utils.mapper.MapperContext;
 
@@ -34,8 +32,9 @@ public class GdbUtilTest {
 	public void testExtractInfo() {
 		String path = "e:/test-data/export/4ff34a0f-1868-4352-a934-3ae2709878f8.gdb";
 		
-		MapperContext<TestDto> context = MapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
-		context = context.setValidEnable(false);
+//		MapperContext<TestDto> context = MapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
+		GeoMapperContext<TestDto> context = GeoMapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
+		context.setValidEnable(false);
 		context.setGroups(ShapeUtil.class);
 //		context.setMapperName("test2");
 		List<TestDto> list = new ArrayList<>();
@@ -53,6 +52,7 @@ public class GdbUtilTest {
 			System.out.println(dataMap);
 		}
 	}
+	
 	@Test
 	public void testExtractInfoGeoJson() {
 		String path = "E:\\test-data\\zcqc\\hyyqq\\海域权属数据.shp";

@@ -20,6 +20,7 @@ import org.gdal.ogr.Feature;
 import org.gdal.ogr.FieldDefn;
 import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
+import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,6 +163,9 @@ public class GdbUtil {
 				layer = dataSource.GetLayer(i);
 				if(StringUtils.isNotBlank(layerName) && !Objects.equals(layerName, layer.GetName())) {
 					continue;
+				}
+				if(layer.GetSpatialRef() != null) {
+					coordinateReferenceSystem = CRS.parseWKT(layer.GetSpatialRef().toString());
 				}
 				int dataIndex = 0;
 				while ((feature = layer.GetNextFeature()) != null) {
