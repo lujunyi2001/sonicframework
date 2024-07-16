@@ -1,5 +1,7 @@
 package org.sonicframework.context.valid.support;
 
+import java.text.NumberFormat;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
@@ -98,8 +100,9 @@ public class DoubleValidSupport implements ConstraintValidator<DoubleValid, Doub
 		if (number == (long) number) {
 			return 0;
 		}
-		
-		String str = String.valueOf(number);
+		NumberFormat format = NumberFormat.getInstance();
+		format.setGroupingUsed(false);
+		String str = format.format(number);
 		String[] split = str.split("\\.");
 		return split.length > 1?split[1].trim().length():0;
 //		int i = 0;

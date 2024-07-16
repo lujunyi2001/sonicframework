@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class CorssOriginConfig {
 
 	private boolean enable = false;
-	private List<String> mappring = new ArrayList<>(Arrays.asList("/**"));;
+	private List<String> mappring = new ArrayList<>(Arrays.asList("/**"));
 	private List<String> allowedOrigins = new ArrayList<>(Arrays.asList("*"));
     private List<String> allowedMethods = new ArrayList<>(Arrays.asList("*"));
     private List<String> allowedHeaders = new ArrayList<>(Arrays.asList("*"));

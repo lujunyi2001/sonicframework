@@ -3,9 +3,9 @@
  * @author lujunyi
  * @异常代码
  * -1:DevelopeCodeException<br>
- * 1001:NotLogInException<br>
+ * 3000:NotLogInException<br>
  * 1002:LogInFailException<br>
- * 1003:NoAuthException<br>
+ * 403:NoAuthException<br>
  * 1101:DataNotValidException<br>
  * 1102:DataNotExistException<br>
  * 1103:DataCheckException<br>
