@@ -12,8 +12,10 @@ public class EncryptConfig {
 
 	private boolean enable = false;
 	private String encryptKey = "__encryptKey";
-	private Set<String> include = new HashSet<>();
     private Set<String> exclude = new HashSet<>();
+    
+    private boolean alwaysDecryptRequestbody = false;
+    private boolean alwaysEcryptResponsebody = false;
 	
 	public EncryptConfig() {
 	}
@@ -34,13 +36,6 @@ public class EncryptConfig {
 		this.encryptKey = encryptKey;
 	}
 
-	public Set<String> getInclude() {
-		return include;
-	}
-
-	public void setInclude(Set<String> include) {
-		this.include = include;
-	}
 
 	public Set<String> getExclude() {
 		return exclude;
@@ -48,6 +43,22 @@ public class EncryptConfig {
 
 	public void setExclude(Set<String> exclude) {
 		this.exclude = exclude;
+	}
+
+	public boolean isAlwaysDecryptRequestbody() {
+		return alwaysDecryptRequestbody;
+	}
+
+	public void setAlwaysDecryptRequestbody(boolean alwaysDecryptRequestbody) {
+		this.alwaysDecryptRequestbody = alwaysDecryptRequestbody;
+	}
+
+	public boolean isAlwaysEcryptResponsebody() {
+		return alwaysEcryptResponsebody;
+	}
+
+	public void setAlwaysEcryptResponsebody(boolean alwaysEcryptResponsebody) {
+		this.alwaysEcryptResponsebody = alwaysEcryptResponsebody;
 	}
 
 

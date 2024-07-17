@@ -13,6 +13,7 @@ import java.util.Locale;
 import javax.servlet.Filter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.sonicframework.core.encrypt.EncryptResponseHandlerInterceptor;
 import org.sonicframework.core.webapi.ResponseResultHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -62,6 +63,8 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 	@Autowired
 	private ResponseResultHandlerInterceptor<?> responseResultHandlerInterceptor;
 	@Autowired
+	private EncryptResponseHandlerInterceptor<?> encryptResponseHandlerInterceptor;
+	@Autowired
 	private WebConfig webConfig;
 	
 	@Override
@@ -105,6 +108,7 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(responseResultHandlerInterceptor).addPathPatterns("/**");
+		registry.addInterceptor(encryptResponseHandlerInterceptor).addPathPatterns("/**");
 	}
 
 	@Override

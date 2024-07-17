@@ -15,12 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonicframework.core.webapi.annotation.ResponseResult;
 import org.sonicframework.core.webapi.service.WebApiResultApplyService;
+import org.sonicframework.utils.http.ServletUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -53,10 +56,12 @@ public class ResponseBodyAdviceHandler<T> implements ResponseBodyAdvice<Object> 
 	@Autowired
 	private WebApiResultApplyService<T> webApiResultApplyService;
 	
+	
+	
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
-		ResponseResult responseResult = (ResponseResult) attributes.getRequest().getAttribute(ResponseResultHandlerInterceptor.sonic_FRAMEWORK_RESPONSE_RESULT_SUPPORT);
+		HttpServletRequest request = ServletUtil.getRequest();
+		ResponseResult responseResult = (ResponseResult) request.getAttribute(ResponseResultHandlerInterceptor.sonic_FRAMEWORK_RESPONSE_RESULT_SUPPORT);
 		return responseResult != null;
 	}
 
@@ -72,14 +77,22 @@ public class ResponseBodyAdviceHandler<T> implements ResponseBodyAdvice<Object> 
 	
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
-	public T handlerException(HttpServletRequest req, Exception e){
+	public ResponseEntity<T> handlerException(HttpServletRequest req, Exception e){
+		HttpStatus status = HttpStatus.OK;
+		
+		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+		HttpStatus responseResult = (HttpStatus) attributes.getRequest().getAttribute(ResponseResultHandlerInterceptor.sonic_EXCEPTION_HTTPSTATUS_SUPPORT);
+		if(responseResult != null) {
+			status = responseResult;
+		}
+		
 		T result = webApiResultApplyService.apply();
 		if(supportValidationException(e, result)) {
-			return result;
+			return new ResponseEntity<T>(result, status);
 		}
 		result = webApiResultApplyService.applyByUncaughException(e);
 		logger.error("uncatch exception:" + e.toString(), e);
-		return result;
+		return new ResponseEntity<T>(result, status);
 	}
 	
 	private boolean supportValidationException(Exception e, T result) {

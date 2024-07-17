@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -64,55 +65,77 @@ public class DecryptFilter<T> implements Filter {
         	return;
         }
         
+        ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse) response);
+        response = responseWrapper;
+        
         req.setCharacterEncoding("utf-8");
         Set<String> set = null;
         try {
         	set = parseRequestEncryptKey(req.getParameter(this.config.getEncryptKey()));
 		} catch (Exception e) {
-			writeResponceError("获取加密项失败", request, response);
+			writeResponceError("获取加密项失败", request, responseWrapper);
     		return;
 		}
-        if(config.getInclude().contains(requestURI) && set.isEmpty()) {
-        	writeResponceError("缺少加密项", request, response);
-    		return;
-        }
-        if(set.isEmpty()) {
-        	chain.doFilter(request, response);
-        	return;
-        }
         if(logger.isDebugEnabled()) {
         	logger.debug("decrypy requestURI:[{}], keys:[{}]", requestURI, set);
         }
-        Map<String, String[]> paramMap = req.getParameterMap();
+        
+        request = buildRequestWrapper(set, req, responseWrapper);
+        if(request == null) {
+        	return;
+        }
+
+        chain.doFilter(request, response);
+        encryptResponseBody(request, responseWrapper);
+    }
+    
+    private HttpServletRequest buildRequestWrapper(Set<String> set, HttpServletRequest req, ResponseWrapper response) throws IOException {
+    	Map<String, String[]> paramMap = req.getParameterMap();
         Map<String, String[]> paramMap2 = Maps.newHashMap();
 
-        
-        for(String item:paramMap.keySet()){
-            String str = paramMap.get(item)[0];
-            try {
-				str = convertEncryptVal(set, str, item);
-			} catch (Exception e) {
-				writeResponceError("解密失败", request, response);
-	    		return;
-			}
-            String[] strArr = new String[1];
-            //特殊字符处理
-            strArr[0]=str;
-            paramMap2.put(item,strArr);
+        if(set == null || set.isEmpty()) {
+        	paramMap2.putAll(paramMap); 
+        }else {
+        	for(String item:paramMap.keySet()){
+                String str = paramMap.get(item)[0];
+                try {
+    				str = convertEncryptVal(set, str, item);
+    			} catch (Exception e) {
+    				writeResponceError("解密失败", req, response);
+    	    		return null;
+    			}
+                String[] strArr = new String[1];
+                //特殊字符处理
+                strArr[0]=str;
+                paramMap2.put(item,strArr);
+            }
         }
 
         ParameterRequestWrapper wrapRequest = new ParameterRequestWrapper(req, paramMap2);
-        request = wrapRequest;
-
-        chain.doFilter(request, response);
+        return wrapRequest;
     }
     
-    private void writeResponceError(String message, ServletRequest request, ServletResponse response) throws IOException {
+    private void encryptResponseBody(ServletRequest request, ResponseWrapper response) throws IOException {
+    	boolean support = request.getAttribute(EncryptResponseHandlerInterceptor.sonic_FRAMEWORK_RESPONSE_ENCRYPT_SUPPORT) != null;
+    	request.removeAttribute(EncryptResponseHandlerInterceptor.sonic_FRAMEWORK_RESPONSE_ENCRYPT_SUPPORT);
+    	if(!support) {
+    		response.copyBodyToResponse();
+    		return;
+    	}
+    	String resData = new String(response.getContentAsByteArray());
+    	String encrypt = RSAUtil.encrypt(resData.getBytes(), rsakeyProvider.generatePrivateKey());
+    	response.reset();
+    	response.getOutputStream().write(encrypt.getBytes());
+    	response.copyBodyToResponse();
+    }
+    
+    private void writeResponceError(String message, ServletRequest request, ResponseWrapper response) throws IOException {
     	T dto = resultApplyService.applyByResult(DevelopeCodeException.CODE, message);
     	request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json;charset=utf-8");
 		response.getWriter().write(JsonUtil.toJson(dto));
+		encryptResponseBody(request, response);
     }
     
     private String convertEncryptVal(Set<String> set, String oldVal, String key) throws Exception {

@@ -106,34 +106,46 @@ public class RSAUtil {
     public static String encrypt(String data, Key publicKey) {
     	ByteArrayOutputStream out = null;
     	try {
-			Cipher cipher = Cipher.getInstance("RSA");
-			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-	        int inputLen = data.getBytes(charset).length;
-	        out = new ByteArrayOutputStream();
-	        int offset = 0;
-	        byte[] cache;
-	        int i = 0;
-	        // 对数据分段加密
-	        while (inputLen - offset > 0) {
-	            if (inputLen - offset > MAX_ENCRYPT_BLOCK) {
-	                cache = cipher.doFinal(data.getBytes(charset), offset, MAX_ENCRYPT_BLOCK);
-	            } else {
-	                cache = cipher.doFinal(data.getBytes(charset), offset, inputLen - offset);
-	            }
-	            out.write(cache, 0, cache.length);
-	            i++;
-	            offset = i * MAX_ENCRYPT_BLOCK;
-	        }
-	        byte[] encryptedData = out.toByteArray();
-	        // 获取加密内容使用base64进行编码,并以UTF-8为标准转化成字符串
-	        // 加密后的字符串
-	        return Base64.encodeBase64String(encryptedData);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | UnsupportedEncodingException e) {
+    		byte[] bytes = data.getBytes(charset);
+	        return encrypt(bytes, publicKey);
+		} catch (UnsupportedEncodingException e) {
 			throw new EncryptException("加密失败", e);
 		} finally {
 			StreamUtil.close(out);
 		}
         
+    }
+    public static String encrypt(byte[] data, Key publicKey) {
+    	ByteArrayOutputStream out = null;
+    	try {
+    		Cipher cipher = Cipher.getInstance("RSA");
+    		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+    		int inputLen = data.length;
+    		out = new ByteArrayOutputStream();
+    		int offset = 0;
+    		byte[] cache;
+    		int i = 0;
+    		// 对数据分段加密
+    		while (inputLen - offset > 0) {
+    			if (inputLen - offset > MAX_ENCRYPT_BLOCK) {
+    				cache = cipher.doFinal(data, offset, MAX_ENCRYPT_BLOCK);
+    			} else {
+    				cache = cipher.doFinal(data, offset, inputLen - offset);
+    			}
+    			out.write(cache, 0, cache.length);
+    			i++;
+    			offset = i * MAX_ENCRYPT_BLOCK;
+    		}
+    		byte[] encryptedData = out.toByteArray();
+    		// 获取加密内容使用base64进行编码,并以UTF-8为标准转化成字符串
+    		// 加密后的字符串
+    		return Base64.encodeBase64String(encryptedData);
+    	} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+    		throw new EncryptException("加密失败", e);
+    	} finally {
+    		StreamUtil.close(out);
+    	}
+    	
     }
     
     /**
@@ -144,35 +156,50 @@ public class RSAUtil {
      * @return
      */
     public static String decrypt(String data, Key privateKey) {
+    	return decrypt(Base64.decodeBase64(data), privateKey);
+    }
+    public static byte[] decryptReturnBytes(String data, Key privateKey) {
+    	return decryptReturnBytes(Base64.decodeBase64(data), privateKey);
+    }
+    public static byte[] decryptReturnBytes(byte[] dataBytes, Key privateKey) {
     	ByteArrayOutputStream out = null;
     	try {
     		Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            byte[] dataBytes = Base64.decodeBase64(data);
-            int inputLen = dataBytes.length;
-            out = new ByteArrayOutputStream();
-            int offset = 0;
-            byte[] cache;
-            int i = 0;
-            // 对数据分段解密
-            while (inputLen - offset > 0) {
-                if (inputLen - offset > MAX_DECRYPT_BLOCK) {
-                    cache = cipher.doFinal(dataBytes, offset, MAX_DECRYPT_BLOCK);
-                } else {
-                    cache = cipher.doFinal(dataBytes, offset, inputLen - offset);
-                }
-                out.write(cache, 0, cache.length);
-                i++;
-                offset = i * MAX_DECRYPT_BLOCK;
-            }
-            byte[] decryptedData = out.toByteArray();
-            // 解密后的内容
-            return new String(decryptedData, "UTF-8");
-    	} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | UnsupportedEncodingException e) {
-			throw new EncryptException("解密失败", e);
-		} finally {
-			StreamUtil.close(out);
-		}
+    		cipher.init(Cipher.DECRYPT_MODE, privateKey);
+    		int inputLen = dataBytes.length;
+    		out = new ByteArrayOutputStream();
+    		int offset = 0;
+    		byte[] cache;
+    		int i = 0;
+    		// 对数据分段解密
+    		while (inputLen - offset > 0) {
+    			if (inputLen - offset > MAX_DECRYPT_BLOCK) {
+    				cache = cipher.doFinal(dataBytes, offset, MAX_DECRYPT_BLOCK);
+    			} else {
+    				cache = cipher.doFinal(dataBytes, offset, inputLen - offset);
+    			}
+    			out.write(cache, 0, cache.length);
+    			i++;
+    			offset = i * MAX_DECRYPT_BLOCK;
+    		}
+    		byte[] decryptedData = out.toByteArray();
+    		return decryptedData;
+    	} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+    		throw new EncryptException("解密失败", e);
+    	} finally {
+    		StreamUtil.close(out);
+    	}
+    	
+    }
+    public static String decrypt(byte[] dataBytes, Key privateKey) {
+    	
+    	try {
+    		byte[] decryptedData = decryptReturnBytes(dataBytes, privateKey);
+    		// 解密后的内容
+    		return new String(decryptedData, "UTF-8");
+    	} catch (UnsupportedEncodingException e) {
+    		throw new EncryptException("解密失败", e);
+    	} 
     	
     }
     

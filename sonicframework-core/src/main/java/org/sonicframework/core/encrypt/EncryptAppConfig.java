@@ -20,8 +20,6 @@ public class EncryptAppConfig<T> {
 	@Autowired
 	private EncryptConfig encryptConfig;
 	@Autowired
-	private RsakeyProviderService rsakeyProvider;
-	@Autowired
 	private WebApiResultApplyService<T> resultApplyService;
 	
 	private static Logger logger = LoggerFactory.getLogger(EncryptAppConfig.class);
@@ -38,9 +36,9 @@ public class EncryptAppConfig<T> {
 	
 	@Bean
 	@ConditionalOnProperty(prefix = "sonicframework.encrypt", name = "enable", havingValue = "true", matchIfMissing = false)
-    public FilterRegistrationBean<DecryptFilter<T>> decryptFilter(){
+    public FilterRegistrationBean<DecryptFilter<T>> decryptFilter(@Autowired RsakeyProviderService rsakeyProvider){
     	FilterRegistrationBean<DecryptFilter<T>> filterRegBean = new FilterRegistrationBean<>();
-    	DecryptFilter<T> decryptFilter = new DecryptFilter<>(this.encryptConfig, this.rsakeyProvider);
+    	DecryptFilter<T> decryptFilter = new DecryptFilter<>(this.encryptConfig, rsakeyProvider);
     	decryptFilter.setResultApplyService(resultApplyService);
     	filterRegBean.setFilter(decryptFilter);
     	filterRegBean.addUrlPatterns("/*");
