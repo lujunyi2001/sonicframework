@@ -25,6 +25,11 @@ public class SystemLogDto extends BaseDto{
 	protected String param;//请求参数
 	protected String requestBody;//请求body
 	protected String result;//返回结果
+	protected String ext1;//扩展字段1
+	protected String ext2;//扩展字段2
+	protected String ext3;//扩展字段3
+	protected String ext4;//扩展字段4
+	protected String ext5;//扩展字段5
 	
 	public Long getId() {
 		return id;
@@ -133,6 +138,39 @@ public class SystemLogDto extends BaseDto{
 	}
 	public void setRequestBody(String requestBody) {
 		this.requestBody = requestBody;
+	}
+	public String getExt1() {
+		return ext1;
+	}
+	public void setExt1(String ext1) {
+		this.ext1 = ext1;
+	}
+	public String getExt2() {
+		return ext2;
+	}
+	public void setExt2(String ext2) {
+		this.ext2 = ext2;
+	}
+	public String getExt3() {
+		return ext3;
+	}
+	public void setExt3(String ext3) {
+		this.ext3 = ext3;
+	}
+	public String getExt4() {
+		return ext4;
+	}
+	public void setExt4(String ext4) {
+		this.ext4 = ext4;
+	}
+	public String getExt5() {
+		return ext5;
+	}
+	public void setExt5(String ext5) {
+		this.ext5 = ext5;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 	
 

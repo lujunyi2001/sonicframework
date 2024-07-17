@@ -211,7 +211,7 @@ public class SystemLogHelper {
 			return ;
 		}
 		if(request != null) {
-			dto.setOperateIp(request.getRemoteAddr());
+			dto.setOperateIp(ServletUtil.getClientIp(request));
 			dto.setAccessUrl(request.getRequestURL().toString());
     		Map<String, String> map = ServletUtil.getParameterMap(request);
     		String[] skipRequestParam = log.skipRequestParam();
