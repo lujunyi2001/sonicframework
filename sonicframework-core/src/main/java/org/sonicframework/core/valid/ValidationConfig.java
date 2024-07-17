@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author lujunyi
  */
-@Configuration
+@Configuration("sonicValidationConfig")
 public class ValidationConfig {
 
 	@Autowired
 	private ValidConfig validConfig;
 
-	@Bean
+	@Bean("sonicValidator")
 	public Validator validator() {
 		ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class).configure()
 				.failFast(validConfig.isFailfast()).buildValidatorFactory();

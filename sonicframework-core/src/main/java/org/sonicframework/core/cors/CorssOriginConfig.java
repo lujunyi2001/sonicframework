@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration("sonicCorssOriginConfig")
 @ConfigurationProperties("sonicframework.corss-origin")
 public class CorssOriginConfig {
 

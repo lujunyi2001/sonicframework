@@ -15,14 +15,14 @@ import org.springframework.web.filter.CorsFilter;
 /**
 * @author lujunyi
 */
-@Configuration
+@Configuration("sonicCorsAppConfig")
 public class CorsAppConfig {
 	private static Logger logger = LoggerFactory.getLogger(CorsAppConfig.class);
 
 	public CorsAppConfig() {
 	}
 	
-	@Bean
+	@Bean("sonicCorsFilter")
 	@ConditionalOnProperty(prefix = "sonicframework.corss-origin", name = "enable", havingValue = "true", matchIfMissing = false)
     public CorsFilter corsFilter(CorssOriginConfig corssOriginConfig) {
 		List<String> mapprings = corssOriginConfig.getMappring();

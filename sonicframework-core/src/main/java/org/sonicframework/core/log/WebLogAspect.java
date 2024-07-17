@@ -41,7 +41,7 @@ import org.sonicframework.utils.http.ServletUtil;
  * @author lujunyi
  */
 @Aspect
-@Component
+@Component("sonicWebLogAspect")
 @Order(Integer.MAX_VALUE)
 public class WebLogAspect {
 

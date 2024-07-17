@@ -57,7 +57,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 /**
  * @author lujunyi
  */
-@Configuration
+@Configuration("sonicWebAppConfigurer")
 public class WebAppConfigurer implements WebMvcConfigurer {
 
 	@Autowired
@@ -211,7 +211,7 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 		return null;
 	}
 	
-	@Bean
+	@Bean("sonicLoggingFilterRegistration")
 	public FilterRegistrationBean<Filter> loggingFilterRegistration() {
 	    FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
 	    RequestBodyFilter filter = new RequestBodyFilter();

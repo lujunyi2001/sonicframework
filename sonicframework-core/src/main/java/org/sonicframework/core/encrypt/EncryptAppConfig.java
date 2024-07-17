@@ -14,7 +14,7 @@ import org.springframework.core.Ordered;
 /**
 * @author lujunyi
 */
-@Configuration
+@Configuration("sonicEncryptAppConfig")
 public class EncryptAppConfig<T> {
 	
 	@Autowired
@@ -27,14 +27,14 @@ public class EncryptAppConfig<T> {
 	public EncryptAppConfig() {
 	}
 
-	@Bean
+	@Bean("sonicRsakeyProviderService")
 	@ConditionalOnMissingBean
 	public RsakeyProviderService rsakeyProviderService() {
 		logger.info("load RsakeyProviderService use default bean DefaultRsakeyProviderService");
 		return new DefaultRsakeyProviderService();
 	}
 	
-	@Bean
+	@Bean("sonicDecryptFilter")
 	@ConditionalOnProperty(prefix = "sonicframework.encrypt", name = "enable", havingValue = "true", matchIfMissing = false)
     public FilterRegistrationBean<DecryptFilter<T>> decryptFilter(@Autowired RsakeyProviderService rsakeyProvider){
     	FilterRegistrationBean<DecryptFilter<T>> filterRegBean = new FilterRegistrationBean<>();

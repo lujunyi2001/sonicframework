@@ -21,7 +21,7 @@ import org.sonicframework.context.fillup.annotation.DictFillup;
  * @author lujunyi
  */
 @Aspect
-@Component
+@Component("sonicFillupAspect")
 @Order(Integer.MAX_VALUE - 2)
 public class FillupAspect {
 

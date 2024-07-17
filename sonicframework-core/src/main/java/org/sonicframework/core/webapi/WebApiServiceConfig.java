@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import org.sonicframework.context.webapi.dto.ResultDto;
 
-@Configuration
+@Configuration("sonicWebApiServiceConfig")
 public class WebApiServiceConfig {
 
 	@Bean("webApiResultApplyService")

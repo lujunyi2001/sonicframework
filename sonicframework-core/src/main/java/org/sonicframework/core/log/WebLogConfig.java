@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 
-@Configuration
+@Configuration("sonicWebLogConfig")
 @ConfigurationProperties("sonicframework.weblog")
 public class WebLogConfig {
 

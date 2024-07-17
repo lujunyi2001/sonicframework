@@ -3,7 +3,7 @@ package org.sonicframework.core.fillup;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration("sonicFillupConfig")
 @ConfigurationProperties("sonicframework.fillup")
 public class FillupConfig {
 

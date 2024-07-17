@@ -3,7 +3,7 @@ package org.sonicframework.core.valid;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration("sonicValidConfig")
 @ConfigurationProperties("sonicframework.valid")
 public class ValidConfig {
 

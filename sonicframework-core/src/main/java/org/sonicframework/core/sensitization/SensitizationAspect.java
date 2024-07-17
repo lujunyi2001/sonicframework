@@ -23,7 +23,7 @@ import org.sonicframework.utils.sensitization.SensitizationUtil;
  * @author lujunyi
  */
 @Aspect
-@Component
+@Component("sonicSensitizationAspect")
 @Order(Integer.MAX_VALUE - 1)
 public class SensitizationAspect {
 

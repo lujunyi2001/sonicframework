@@ -17,7 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * @author lujunyi
  */
-@Component
+@Component("sonicEncryptResponseHandlerInterceptor")
 public class EncryptResponseHandlerInterceptor<T> implements HandlerInterceptor {
 
 	@Autowired

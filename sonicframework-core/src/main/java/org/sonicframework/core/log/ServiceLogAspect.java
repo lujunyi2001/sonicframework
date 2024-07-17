@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author lujunyi
  */
 //@Aspect
-//@Component
+//@Component("sonicServiceLogAspect")
 //@Order(Integer.MAX_VALUE - 1)
 public class ServiceLogAspect {
 

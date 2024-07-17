@@ -3,7 +3,7 @@ package org.sonicframework.core.sensitization;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration("sonicSensitizationConfig")
 @ConfigurationProperties("sonicframework.sensitization")
 public class SensitizationConfig {
 
