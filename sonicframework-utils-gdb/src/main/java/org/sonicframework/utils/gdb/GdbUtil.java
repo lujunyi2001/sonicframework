@@ -20,8 +20,15 @@ import org.gdal.ogr.Feature;
 import org.gdal.ogr.FieldDefn;
 import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.MultiSurface;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Geometry;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +40,11 @@ import org.sonicframework.utils.ConsumerImpEntity;
 import org.sonicframework.utils.ValidateResult;
 import org.sonicframework.utils.ValidationUtil;
 import org.sonicframework.utils.geometry.GeometryUtil;
+import org.sonicframework.utils.geometry.ParseGeoDataErrInfo;
 import org.sonicframework.utils.geometry.ShpInfoVo;
 import org.sonicframework.utils.geometry.ShpRecordVo;
 import org.sonicframework.utils.geometry.mapper.GeoFieldMapperUtil;
+import org.sonicframework.utils.geometry.mapper.GeoMapperContext;
 import org.sonicframework.utils.mapper.MapperContext;
 import org.sonicframework.utils.mapper.PostMapper;
 
@@ -83,6 +92,10 @@ public class GdbUtil {
 		Class<?>[] validGroups = context.getValidGroups();
 		context.setValidEnable(false, validGroups);
 		String layerName = context.getMapperName();
+		GeoMapperContext<T> geoMapperContext = null;
+		if(context != null && context instanceof GeoMapperContext) {
+			geoMapperContext = ((GeoMapperContext<T>)context);
+		}
 		extractInfo(pathName, layerName, t -> {
 			T entity = GeoFieldMapperUtil.importMapper(t, context, postMapper);
 			ValidateResult validateResult = null;
@@ -98,16 +111,19 @@ public class GdbUtil {
 			}
 			consumer.execute(entity, validateResult);
 
-		});
+		}, geoMapperContext);
 		context.setValidEnable(validEnable, validGroups);
 	}
 
 	public static void extractInfo(String pathName, String layerName, Consumer<ShpInfoVo> consumer) {
+		extractInfo(pathName, layerName, consumer, null);
+	}
+	public static <T>void extractInfo(String pathName, String layerName, Consumer<ShpInfoVo> consumer, GeoMapperContext<T> geoMapperContext) {
 		File basePath = new File(pathName);
 		checkFile(basePath);
 
 		Consumer<LayerFeatureContextVo> featureConsumer = t -> {
-			ShpInfoVo infoVo = buildShpInfoVo(t);
+			ShpInfoVo infoVo = buildShpInfoVo(t, geoMapperContext);
 			consumer.accept(infoVo);
 		};
 		extractOneGdbFile(basePath, layerName, featureConsumer);
@@ -122,7 +138,7 @@ public class GdbUtil {
 //		}
 	}
 
-	private static ShpInfoVo buildShpInfoVo(LayerFeatureContextVo layerContextVo) {
+	private static <T>ShpInfoVo buildShpInfoVo(LayerFeatureContextVo layerContextVo, GeoMapperContext<T> geoMapperContext) {
 		ShpInfoVo info = new ShpInfoVo();
 		info.setSourceName(layerContextVo.getLayer().GetName());
 		info.setDataIndex(layerContextVo.getFeatureDataIndex());
@@ -134,16 +150,60 @@ public class GdbUtil {
 		int fieldCount = feature.GetFieldCount();
 		FieldDefn fieldDefnRef = null;
 		ShpRecordVo record = null;
-		for (int i = 0; i < fieldCount; i++) {
-			fieldDefnRef = feature.GetFieldDefnRef(i);
-			record = new ShpRecordVo(fieldDefnRef.GetName(), getProperty(feature, i), getPropertyType(feature, i));
-			recordList.add(record);
+		String exportToWkt = null;
+		try {
+			for (int i = 0; i < fieldCount; i++) {
+				fieldDefnRef = feature.GetFieldDefnRef(i);
+				record = new ShpRecordVo(fieldDefnRef.GetName(), getProperty(feature, i), getPropertyType(feature, i));
+				recordList.add(record);
+			}
+			exportToWkt = feature.GetGeometryRef().ExportToWkt();
+			if(StringUtils.isNotBlank(exportToWkt)) {
+				Geometry geo = GeometryUtil.readGeometry(exportToWkt);
+				if(geoMapperContext != null && geoMapperContext.getCrs() != null) {
+					if(info.getCoordinateReferenceSystem() == null) {
+						throw new FileCheckException("没有找到坐标系文件");
+					}
+					if(!Objects.equals(info.getCoordinateReferenceSystem(), geoMapperContext.getCrs())) {
+						try {
+							MathTransform mt = CRS.findMathTransform(info.getCoordinateReferenceSystem(), geoMapperContext.getCrs(), true);
+							if(geo instanceof MultiSurface) {
+								String cloneStr = GeometryUtil.writeGeometry(geo);
+								geo = GeometryUtil.readGeometry(cloneStr);
+							}
+							geo = JTS.transform(geo, mt);
+				    	} catch (FactoryException e) {
+							throw new DataCheckException("创建坐标系转换失败", e);
+						} catch (MismatchedDimensionException | TransformException e) {
+							throw new DataCheckException("创建坐标系转换失败", e);
+				    	}
+					}
+					
+				}
+				info.setGeo(geo);
+				info.setGeoStr(GeometryUtil.writeGeometry(geo));
+			}
+		} catch (Throwable e) {
+			if(geoMapperContext != null && geoMapperContext.getParseGeoDataErrHandler() != null) {
+				Throwable throwObj = null;
+				if(e instanceof BaseBizException) {
+					throwObj = e.getCause();
+					if(throwObj == null) {
+						throwObj = e;
+					}
+					ParseGeoDataErrInfo errInfo = new ParseGeoDataErrInfo(throwObj, info, exportToWkt);
+					geoMapperContext.getParseGeoDataErrHandler().accept(errInfo);
+				}
+			}else {
+				if(e instanceof RuntimeException) {
+					throw (RuntimeException)e;
+				}else {
+					throw new FileCheckException("解析gdb失败", e);
+				}
+			}
 		}
-		String exportToWkt = feature.GetGeometryRef().ExportToWkt();
-		if(StringUtils.isNotBlank(exportToWkt)) {
-			info.setGeo(GeometryUtil.readGeometry(exportToWkt));
-		}
-		info.setGeoStr(exportToWkt);
+		
+		
 		return info;
 	}
 

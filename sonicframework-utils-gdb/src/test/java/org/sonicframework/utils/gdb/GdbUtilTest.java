@@ -9,9 +9,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.jackrabbit.uuid.UUID;
+import org.geotools.referencing.CRS;
 import org.junit.Test;
-
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.sonicframework.context.dto.DictCodeDto;
+import org.sonicframework.context.exception.DevelopeCodeException;
 import org.sonicframework.utils.dto.TestDto;
 import org.sonicframework.utils.geometry.ExportErrorPolicy;
 import org.sonicframework.utils.geometry.ShapeUtil;
@@ -24,19 +27,35 @@ import org.sonicframework.utils.mapper.MapperContext;
 */
 public class GdbUtilTest {
 
+	public static final CoordinateReferenceSystem CGCS2000;
+	static {
+		String wktCgcs2000 = "GEOGCS[\"GCS_China_Geodetic_Coordinate_System_2000\",DATUM[\"D_China_2000\",SPHEROID[\"CGCS2000\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]]";
+		try {
+			CGCS2000 = CRS.parseWKT(wktCgcs2000);
+		} catch (FactoryException e) {
+			throw new DevelopeCodeException("不合法的CGCS2000代码定义");
+		}
+	}
+	
 	public GdbUtilTest() {
 		// TODO Auto-generated constructor stub
 	}
 	
 	@Test
 	public void testExtractInfo() {
-		String path = "e:/test-data/export/4ff34a0f-1868-4352-a934-3ae2709878f8.gdb";
+		String path = "E:\\test-data\\export\\问题数据圆形.gdb";
 		
 //		MapperContext<TestDto> context = MapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
 		GeoMapperContext<TestDto> context = GeoMapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
 		context.setValidEnable(false);
 		context.setGroups(ShapeUtil.class);
 //		context.setMapperName("test2");
+		context.setCrs(CGCS2000);
+		context.setParseGeoDataErrHandler(t->{
+			System.out.println(t.getInfo());
+			System.out.println(t.getGeoStr());
+			t.getCause().printStackTrace();
+		});
 		List<TestDto> list = new ArrayList<>();
 		GdbUtil.extractInfoEntity(path, context, (t, r)->{
 			System.out.println(r);
