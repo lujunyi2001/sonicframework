@@ -1,6 +1,7 @@
 package org.sonicframework.utils.geometry;
 
 import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.geometry.jts.WKTReader2;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.MultiPoint;
@@ -46,7 +47,13 @@ public class GeometryUtil {
         try {
 			return reader.read(str);
 		} catch (ParseException e) {
-			throw new DataCheckException("shape数据不合法", e);
+			WKTReader2 reader2 = new WKTReader2(0.2);
+			try {
+				return reader2.read(str);
+			} catch (ParseException e1) {
+				throw new DataCheckException("shape数据不合法", e);
+			}
+			
 		}
 	}
 }

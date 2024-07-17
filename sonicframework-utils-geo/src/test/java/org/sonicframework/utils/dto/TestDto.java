@@ -51,8 +51,6 @@ public class TestDto extends BaseDto {
 	private String splitStr;
 	private String splitStr2;
 	private String splitStr3;
-	@FieldMapper(field = "建设阶段", order = -1, groups = ShapeUtil.class)
-	private String jsjd;
 	@FieldMapper(field = "the_geom", action = FieldMapperConst.MAPPER_IMPORT, groups = ShapeUtil.class)
 	private Geometry geo;
 	@FieldMapper(field = "the_geom", serialize = StrGeoSerializeSupport.class, groups = ShapeUtil.class)

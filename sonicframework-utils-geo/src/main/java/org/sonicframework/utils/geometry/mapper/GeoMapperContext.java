@@ -1,12 +1,14 @@
 package org.sonicframework.utils.geometry.mapper;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import org.sonicframework.context.dto.DictCodeDto;
+import org.sonicframework.utils.geometry.ParseGeoDataErrInfo;
 import org.sonicframework.utils.mapper.MapperContext;
 
 /**
@@ -15,6 +17,7 @@ import org.sonicframework.utils.mapper.MapperContext;
 public class GeoMapperContext<T> extends MapperContext<T> {
 
 	private CoordinateReferenceSystem crs;
+	private Consumer<ParseGeoDataErrInfo> parseGeoDataErrHandler;
 	
 	protected GeoMapperContext() {}
 	
@@ -51,6 +54,14 @@ public class GeoMapperContext<T> extends MapperContext<T> {
 
 	public void setCrs(CoordinateReferenceSystem crs) {
 		this.crs = crs;
+	}
+
+	public Consumer<ParseGeoDataErrInfo> getParseGeoDataErrHandler() {
+		return parseGeoDataErrHandler;
+	}
+
+	public void setParseGeoDataErrHandler(Consumer<ParseGeoDataErrInfo> parseGeoDataErrHandler) {
+		this.parseGeoDataErrHandler = parseGeoDataErrHandler;
 	}
 
 }

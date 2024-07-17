@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,12 +24,16 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.geojson.geom.GeometryJSON;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonicframework.utils.ConsumerImpEntity;
@@ -42,6 +47,7 @@ import org.sonicframework.utils.geometry.mapper.GeoMapperContext;
 import org.sonicframework.utils.mapper.PostMapper;
 
 import org.sonicframework.context.exception.BaseBizException;
+import org.sonicframework.context.exception.DataCheckException;
 import org.sonicframework.context.exception.DataNotValidException;
 import org.sonicframework.context.exception.FileCheckException;
 
@@ -174,7 +180,7 @@ public class ShapeUtil {
 			}
 			consumer.execute(entity, validateResult);
 			
-		});
+		}, context);
 		context.setValidEnable(validEnable, validGroups);
 	}
 	
@@ -185,11 +191,15 @@ public class ShapeUtil {
 	}
 	
 	public static void extractInfo(String pathName, Consumer<ShpInfoVo> consumer){
+		extractInfo(pathName, consumer, null);
+	}
+	
+	public static <T>void extractInfo(String pathName, Consumer<ShpInfoVo> consumer, GeoMapperContext<T> context){
 		File basePath = new File(pathName);
 		checkFile(basePath);
 		
 		Consumer<FeatureContextVo> featureConsumer = t->{
-			ShpInfoVo infoVo = buildShpInfoVo(t);
+			ShpInfoVo infoVo = buildShpInfoVo(t, context);
 			consumer.accept(infoVo);
 		};
 		if(basePath.isFile()) {
@@ -305,7 +315,7 @@ public class ShapeUtil {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static ShpInfoVo buildShpInfoVo(FeatureContextVo featureVo) {
+	private static <T>ShpInfoVo buildShpInfoVo(FeatureContextVo featureVo, GeoMapperContext<T> context) {
 		ShpInfoVo info = new ShpInfoVo();
 		info.setSourceName(featureVo.getSourceName());
 		info.setDataIndex(featureVo.getDataIndex());
@@ -318,18 +328,59 @@ public class ShapeUtil {
 		
 		// 要素属性信息，名称，值，类型
 		List<Property> propertyList = (List<Property>) feature.getValue();
-		for (Property property : propertyList) {
-			if(property.getValue() != null) {
-				record = new ShpRecordVo(property.getName().getLocalPart(), property.getValue(), property.getType().getBinding());
-				recordList.add(record);
-				logger.trace("buildShpInfoVo record:[{}]", record);
+		String geoStr = null;
+		try {
+			for (Property property : propertyList) {
+				if(property.getValue() != null) {
+					record = new ShpRecordVo(property.getName().getLocalPart(), property.getValue(), property.getType().getBinding());
+					recordList.add(record);
+					logger.trace("buildShpInfoVo record:[{}]", record);
+				}
+				if(property.getValue() != null && Geometry.class.isAssignableFrom(property.getType().getBinding())){
+					Geometry geo = (Geometry) property.getValue();
+					if(context.getCrs() != null) {
+						if(info.getCoordinateReferenceSystem() == null) {
+							throw new FileCheckException("没有找到坐标系文件");
+						}
+						if(!Objects.equals(info.getCoordinateReferenceSystem(), context.getCrs())) {
+							try {
+								MathTransform mt = CRS.findMathTransform(info.getCoordinateReferenceSystem(), context.getCrs(), true);
+								geo = JTS.transform(geo, mt);
+					    	} catch (FactoryException e) {e.printStackTrace();
+								throw new DataCheckException("创建坐标系转换失败", e);
+							} catch (MismatchedDimensionException | TransformException e) {
+								throw new DataCheckException("创建坐标系转换失败", e);
+					    	}
+						}
+					}
+					record.setValue(geo);
+					info.setGeo(geo);
+					geoStr = GeometryUtil.writeGeometry(geo);
+					info.setGeoStr(geoStr);
+					logger.trace("buildShpInfoVo geo:[{}]", (info.getGeo() == null?null:info.getGeo().getClass()));
+				}
 			}
-			if(property.getValue() != null && Geometry.class.isAssignableFrom(property.getType().getBinding())){
-				info.setGeo((Geometry) property.getValue());
-				info.setGeoStr(GeometryUtil.writeGeometry(info.getGeo()));
-				logger.trace("buildShpInfoVo geo:[{}]", (info.getGeo() == null?null:info.getGeo().getClass()));
+		} catch (Throwable e) {
+			if(context.getParseGeoDataErrHandler() != null) {
+				Throwable throwObj = null;
+				if(e instanceof BaseBizException) {
+					throwObj = e.getCause();
+					if(throwObj == null) {
+						throwObj = e;
+					}
+					ParseGeoDataErrInfo errInfo = new ParseGeoDataErrInfo(throwObj, info, geoStr);
+					context.getParseGeoDataErrHandler().accept(errInfo);
+				}
+			}else {
+				if(e instanceof RuntimeException) {
+					throw (RuntimeException)e;
+				}else {
+					throw new FileCheckException("解析shp失败", e);
+				}
 			}
+			
 		}
+		
 		return info;
 	}
 	
