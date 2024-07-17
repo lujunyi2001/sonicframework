@@ -96,7 +96,7 @@ public class WebLogAspect {
         			requestId, 
         			request.getRequestURL(),
         			request.getMethod(), 
-        			request.getRemoteAddr(), 
+        			ServletUtil.getClientIp(request), 
         			user, 
         			ServletUtil.getParameterMap(request, skipParamSet), 
         			SystemLogHelper.getRequestBodyContent(request));
