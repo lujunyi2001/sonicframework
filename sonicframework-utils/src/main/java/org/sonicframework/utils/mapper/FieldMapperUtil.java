@@ -51,6 +51,8 @@ public class FieldMapperUtil {
 	private static Map<Class<?>, List<MapperDescVo>> cacheMapperDescVo = new ConcurrentHashMap<>();
 	private static Logger log = LoggerFactory.getLogger(FieldMapperUtil.class);
 	
+	public final static String TITLE_GROUPS_SEP = "$$";
+	
 	private FieldMapperUtil() {}
 	
 	public static List<MapperDescVo> parseDesc(Class<?> clazz){
@@ -96,6 +98,7 @@ public class FieldMapperUtil {
 				if(fieldMapper.targetClass().length > 0) {
 					vo.setTargetClass(fieldMapper.targetClass()[0]);
 				}
+				vo.setTitleGroups(fieldMapper.titleGroups());
 				vo.setMatch(fieldMapper.match());
 				vo.setMatchContains(fieldMapper.matchContains());
 				vo.setSplitSep(fieldMapper.splitSep());
@@ -109,6 +112,8 @@ public class FieldMapperUtil {
 				}
 				vo.setGroups(fieldMapper.groups());
 				vo.setLength(fieldMapper.length());
+				vo.setTitleStyles(fieldMapper.titleStyle());
+				vo.setContentStyle(ArrayUtils.isEmpty(fieldMapper.contentStyle())?null:fieldMapper.contentStyle()[0]);
 				result.add(vo);
 			}
 			
@@ -132,6 +137,7 @@ public class FieldMapperUtil {
 			if(mapper.targetClass().length > 0) {
 				vo.setTargetClass(mapper.targetClass()[0]);
 			}
+			vo.setTitleGroups(mapper.titleGroups());
 			vo.setMatch(mapper.match());
 			vo.setMatchContains(mapper.matchContains());
 			vo.setSplitSep(mapper.splitSep());
@@ -145,6 +151,8 @@ public class FieldMapperUtil {
 			}
 			vo.setGroups(mapper.groups());
 			vo.setLength(mapper.length());
+			vo.setTitleStyles(mapper.titleStyle());
+			vo.setContentStyle(ArrayUtils.isEmpty(mapper.contentStyle())?null:mapper.contentStyle()[0]);
 			result.add(vo);
 		}
 		result.sort((o1, o2)->o1.getOrder() - o2.getOrder());
@@ -217,7 +225,14 @@ public class FieldMapperUtil {
 	
 	public static Map<String, List<MapperDescVo>> getFromDescMap(Class<?> clazz, Class<?>...groups){
 		List<MapperDescVo> parseDesc = parseDescByGroups(clazz, groups);
-		Map<String, List<MapperDescVo>> result = parseDesc.stream().collect(Collectors.groupingBy(MapperDescVo::getOtherName, LinkedHashMap::new, Collectors.toList()));
+		Map<String, List<MapperDescVo>> result = parseDesc.stream().collect(Collectors.groupingBy(t->{
+			String[] titleGroups = Stream.of(t.getTitleGroups()).filter(titleGroup->StringUtils.isNotBlank(titleGroup)).toArray(String[]::new);
+			if(ArrayUtils.isEmpty(titleGroups)) {
+				return t.getOtherName();
+			}
+			
+			return StringUtils.join(titleGroups, TITLE_GROUPS_SEP) + TITLE_GROUPS_SEP + t.getOtherName();
+		}, LinkedHashMap::new, Collectors.toList()));
 		return result;
 	}
 	

@@ -28,6 +28,7 @@ public @interface FieldMapper {
 	String dictName() default "";
 	String format() default "";
 	Class<?>[] targetClass() default {};
+	String[] titleGroups() default {};
 	Match[] match() default{};
 	boolean matchContains() default false;
 	String splitSep() default "";
@@ -39,4 +40,6 @@ public @interface FieldMapper {
 	Class<? extends SerializeSupport<?, ?>>[] serialize() default{};
 	Class<?>[] groups() default{};
 	int length() default 0;
+	Style[] titleStyle() default {};
+	Style[] contentStyle() default {};
 }

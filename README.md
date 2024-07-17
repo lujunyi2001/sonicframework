@@ -38,7 +38,7 @@ public class TestWebApiController {
 {
     "result": 0,
     "message": null,
-    "data":"Hello World"
+    "data": "Hello World"
 }
 
 ```
@@ -60,7 +60,7 @@ public class TestWebApiController {
 }
 ```
 
-### 统一异常处理
+## 统一异常处理
 如果处理失败（比如验证失败），直接抛出下面异常即可（需要自定义异常信息），返回结果result为异常代码，message为自定义的异常信息
 | 异常类名                                     | 场景                                   |
 | ---------------------------------------- | ------------------------------------ |
@@ -77,6 +77,7 @@ public class TestWebApiController {
 | org.sonicframework.context.exception.NotLogInException | 未登录异常                                |
 | org.sonicframework.context.exception.NoAuthException | 未授权异常                                |
 <font color=#FF0000 >**注**:</font>如果未捕获异常，返回的结果result为500，message为异常的toString方法返回值。也可以自定义异常，只需要自定义异常类继承org.sonicframework.context.exception.BaseBizException类，并且自定义异常代码就可以
+
 ``` java
 public class CustomerException extends BaseBizException {
 
@@ -97,6 +98,7 @@ public class CustomerException extends BaseBizException {
 ## 后台验证
 系统支持hibernate-validation验证框架并且自定义了一些验证注解
 在模型中定义验证
+
 ``` java 
 import org.sonicframework.context.valid.annotation.DoubleValid;
 import org.sonicframework.context.valid.annotation.IntegerValid;
@@ -110,6 +112,7 @@ public class TestDto {
 	private Double dou;
     @IntegerValid(nullable = false, zeroable = false, fieldLabel = "显示标签2")
 	private Integer inte;
+}
 
 ```
 StringType属性
@@ -135,7 +138,7 @@ DoubleValid属性
 | message    | string  |      | 验证最终返回信息，字段的完整验证信息，设置时fieldLabel不生效 |
 | groups     | class数组 |      | 验证分组                                |
 IntegerValid属性
-| 字段名        | 类型      | 默认值  | 说明                                  |
+| 字段名        | 类型      | 默认值  | 说明                |
 | ---------- | ------- | ---- | ----------------------------------- |
 | nullable   | boolean | true | 是否可以为null                           |
 | zeroable   | boolean | true | 是否可以为0                              |
@@ -146,7 +149,7 @@ IntegerValid属性
 | message    | string  |      | 验证最终返回信息，字段的完整验证信息，设置时fieldLabel不生效 |
 | groups     | class数组 |      | 验证分组                                |
 
-在方法参数中要加入@Valid
+在方法参数中要加入@Validated
 ``` java
 import org.springframework.validation.annotation.Validated;
 
@@ -192,7 +195,7 @@ sonicframework:
 - 入参的url、httpmethod、客户端ip、自定义用户信息、request的param、request的body
 - 正常返回参数的类名、方法名、参数值、返回值、耗时(毫秒)
 - 发生异常的类名、方法名、参数值、异常信息、耗时(毫秒)
-  **注:**所有继承org.sonicframework.context.exception.BaseBizException和配置可接受异常的异常不会打印异常堆栈，否则会打印异常堆栈
+  **注:** 所有继承org.sonicframework.context.exception.BaseBizException和配置可接受异常的异常不会打印异常堆栈，否则会打印异常堆栈
   添加可接受异常列表的配置方法方法如下
   在application.yml中添加
 ``` yaml
@@ -207,6 +210,17 @@ sonicframework:
 sonicframework:
   weblog:
     enable-around-log: false
+```
+### 如何关闭某一方法统一日志
+在方法上添加org.sonicframework.context.log.annotation.SkipWebLog注解
+``` java
+import org.sonicframework.context.log.annotation.SkipWebLog
+
+@SkipWebLog
+@RequestMapping("test")
+public String test(TestDto dto) {
+	return "Hello world";
+}
 ```
 
 ### 自定义用户信息的使用
@@ -396,7 +410,7 @@ public boolean save(@RequestBody Entity entity) {
 在数据模型的成员变量上定义org.sonicframework.context.common.annotation.FieldMapper注解
 - **field:** 导入导出文件的字段名
 - **dictName:** 导入导出字段对应的字典名
-- **format: ** 时间类型的格式化字符串，用于导入时文件为字符串而本地成员变量为java.util.Date类型
+- **format:** 时间类型的格式化字符串，用于导入时文件为字符串而本地成员变量为java.util.Date类型
 - **action:** 定义导入导出的动作。由org.sonicframework.context.common.constaints.FieldMapperConst中的常量定义
     - MAPPER_BOTH:导入导出全解析，默认为全解析
     - MAPPER_IMPORT:导入时解析
@@ -437,7 +451,7 @@ public interface SerializeSupport<F, T> {
 - **local:** 数据模型的成员变量名
 - **other:** 导入导出文件的字段名
 - **dictName:** 导入导出字段对应的字典名
-- **format: ** 时间类型的格式化字符串，用于导入时文件为字符串而本地成员变量为java.util.Date类型
+- **format:** 时间类型的格式化字符串，用于导入时文件为字符串而本地成员变量为java.util.Date类型
 - **action:** 定义导入导出的动作。由org.sonicframework.context.common.constaints.FieldMapperConst中的常量定义
     - MAPPER_BOTH:导入导出全解析，默认为全解析
     - MAPPER_IMPORT:导入时解析

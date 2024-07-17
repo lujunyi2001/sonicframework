@@ -233,7 +233,7 @@ public class ClassUtil {
                     }
                 }
             } else {
-                String className = url.getPath().substring(0, url.getPath().lastIndexOf("."));;
+                String className = url.getPath().substring(0, url.getPath().lastIndexOf("."));
                 String fullClassName = StringUtils.isEmpty(packageName)?className:String.format("%s.%s", packageName, className);
                 clazz = Class.forName(fullClassName);
                 if(filter == null || filter.test(clazz)) {

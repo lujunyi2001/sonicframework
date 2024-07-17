@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import org.sonicframework.context.common.annotation.Match;
 import org.sonicframework.context.common.annotation.SerializeSupport;
+import org.sonicframework.context.common.annotation.Style;
 
 /**
 * @author lujunyi
@@ -23,6 +24,7 @@ public class MapperDescVo implements Serializable{
 	private String label;
 	private String dictName;
 	private Class<?> targetClass;
+	private String[] titleGroups;
 	private Match[] match;
 	private boolean matchContains;
 	private String splitSep;
@@ -40,6 +42,8 @@ public class MapperDescVo implements Serializable{
 	private Class<? extends SerializeSupport<?, ?>> serializeSupportClazz;
 	private Class<?>[] groups = new Class<?>[0];
 	private int length;
+	private Style[] titleStyles;
+	private Style contentStyle;
 	
 	public MapperDescVo(String localName, String otherName, String label) {
 		super();
@@ -211,5 +215,23 @@ public class MapperDescVo implements Serializable{
 	}
 	public void setLength(int length) {
 		this.length = length;
+	}
+	public String[] getTitleGroups() {
+		return titleGroups;
+	}
+	public void setTitleGroups(String[] titleGroups) {
+		this.titleGroups = titleGroups;
+	}
+	public Style[] getTitleStyles() {
+		return titleStyles;
+	}
+	public void setTitleStyles(Style[] titleStyles) {
+		this.titleStyles = titleStyles;
+	}
+	public Style getContentStyle() {
+		return contentStyle;
+	}
+	public void setContentStyle(Style contentStyle) {
+		this.contentStyle = contentStyle;
 	}
 }

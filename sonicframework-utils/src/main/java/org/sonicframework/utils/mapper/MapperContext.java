@@ -28,6 +28,7 @@ public class MapperContext<T> {
 	protected Class<?>[] groups = new Class<?>[0];
 	protected Map<String, Class<?>> fieldClassMap = null;
 	protected int titleIndex = 0;
+	protected int titleEndIndex = -1;
 	protected String mapperName;
 	
 	protected MapperContext() {}
@@ -180,6 +181,14 @@ public class MapperContext<T> {
 
 	public void setMapperName(String mapperName) {
 		this.mapperName = mapperName;
+	}
+
+	public int getTitleEndIndex() {
+		return titleEndIndex;
+	}
+
+	public void setTitleEndIndex(int titleEndIndex) {
+		this.titleEndIndex = titleEndIndex;
 	}
 
 }
