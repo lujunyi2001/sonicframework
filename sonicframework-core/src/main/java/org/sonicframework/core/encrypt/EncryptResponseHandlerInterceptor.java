@@ -31,17 +31,23 @@ public class EncryptResponseHandlerInterceptor<T> implements HandlerInterceptor 
 		if(handler != null && handler instanceof HandlerMethod) {
 			HandlerMethod handlerMethod = (HandlerMethod)handler;
 			Method method = handlerMethod.getMethod();
-			boolean supportEncrypt = config.isEnable() && (config.isAlwaysEcryptResponsebody() || putResponseResultSupport(request, handlerMethod, method));
-			if(supportEncrypt) {
-				request.setAttribute(sonic_FRAMEWORK_RESPONSE_ENCRYPT_SUPPORT, true);
+			EncryptResponseBody encryptResponseBody = putResponseResultSupport(request, handlerMethod, method);
+			if(encryptResponseBody != null && encryptResponseBody.forceIgnore()) {
+				
 			}else {
-				request.removeAttribute(sonic_FRAMEWORK_RESPONSE_ENCRYPT_SUPPORT);
+				boolean supportEncrypt = config.isEnable() && (config.isAlwaysEcryptResponsebody() || encryptResponseBody != null);
+				if(supportEncrypt) {
+					request.setAttribute(sonic_FRAMEWORK_RESPONSE_ENCRYPT_SUPPORT, true);
+				}else {
+					request.removeAttribute(sonic_FRAMEWORK_RESPONSE_ENCRYPT_SUPPORT);
+				}
 			}
+			
 		}
 		return true;
 	}
 	
-	private boolean putResponseResultSupport(HttpServletRequest request, HandlerMethod handlerMethod, Method method) {
+	private EncryptResponseBody putResponseResultSupport(HttpServletRequest request, HandlerMethod handlerMethod, Method method) {
 		EncryptResponseBody encryptResponseBody = null;
 		boolean hasAnnotation = false;
 		if(apiCacheMap.containsKey(method)) {
@@ -65,7 +71,7 @@ public class EncryptResponseHandlerInterceptor<T> implements HandlerInterceptor 
 				encryptResponseBody = null;
 			}
 		}
-		return hasAnnotation;
+		return encryptResponseBody;
 	}
 	
 

@@ -19,4 +19,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Inherited
 public @interface EncryptResponseBody {
+	
+	boolean forceIgnore() default false;
 }
