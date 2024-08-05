@@ -57,16 +57,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-<distributionManagement>
-		<repository>
-			<id>releases</id>
-			<url>http://192.168.0.22:1111/repository/maven-releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<url>http://192.168.0.22:1111/repository/maven-snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>javax</groupId>
