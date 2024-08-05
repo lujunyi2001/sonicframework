@@ -78,7 +78,7 @@ public class DoubleValidSupport implements ConstraintValidator<DoubleValid, Doub
 			setMsg(context, intMsg);
 			return false;
 		}
-		if (decimalLen > 0 && decimalLen < getNumberDecimalDigits(value)) {
+		if (decimalLen > 0 && decimalLen < getNumberDecimalDigits(value, decimalLen)) {
 			setMsg(context, decimalMsg);
 			return false;
 		}
@@ -96,12 +96,13 @@ public class DoubleValidSupport implements ConstraintValidator<DoubleValid, Doub
 		}
 	}
 
-	public static int getNumberDecimalDigits(double number) {
+	public static int getNumberDecimalDigits(double number, int maxDecimalLen) {
 		if (number == (long) number) {
 			return 0;
 		}
 		NumberFormat format = NumberFormat.getInstance();
 		format.setGroupingUsed(false);
+		format.setMaximumFractionDigits(maxDecimalLen + 2);
 		String str = format.format(number);
 		String[] split = str.split("\\.");
 		return split.length > 1?split[1].trim().length():0;
