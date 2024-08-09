@@ -428,7 +428,8 @@ public class FieldMapperUtil {
 			list = entry.getValue();
 			list = list.stream().filter(t->hasAction(t, FieldMapperConst.MAPPER_EXPORT)).collect(Collectors.toList());
 			if(list.isEmpty()) {
-				throw new DevelopeCodeException("can not found FieldMapper or ClassFieldMapper with field '" + entry.getKey() + "'");
+				continue;
+//				throw new DevelopeCodeException("can not found FieldMapper or ClassFieldMapper with field '" + entry.getKey() + "'");
 			}
 			if(!fieldClassMap.containsKey(entry.getKey())) {
 				throw new DevelopeCodeException("can not found FieldMapper or ClassFieldMapper with field '" + entry.getKey() + "'");
