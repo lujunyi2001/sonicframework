@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("sonicframework.sensitization")
 public class SensitizationConfig {
 
-	private boolean enable = true;
+	private boolean enable = false;
 	
 	public SensitizationConfig() {
 	}

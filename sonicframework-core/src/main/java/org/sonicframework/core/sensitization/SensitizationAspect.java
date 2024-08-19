@@ -1,7 +1,8 @@
 package org.sonicframework.core.sensitization;
 
 import java.lang.reflect.Method;
-import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -14,10 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import org.sonicframework.context.sensitization.SensitizationResultWrapperSupport;
 import org.sonicframework.context.sensitization.annotation.Sensitization;
-import org.sonicframework.utils.sensitization.SensitizationItemVo;
-import org.sonicframework.utils.sensitization.SensitizationUtil;
+import org.sonicframework.utils.http.ServletUtil;
+import org.sonicframework.utils.sensitization.SensitiveRequestContext;
 
 /**
  * @author lujunyi
@@ -31,8 +31,6 @@ public class SensitizationAspect {
     
     @Autowired
     private SensitizationConfig webLogConfig;
-    @Autowired(required = false)
-    private List<SensitizationResultWrapperSupport<?>> wrapperSupportList;
     
     @Pointcut("@annotation(org.sonicframework.context.sensitization.annotation.Sensitization)")
     /** 所有controller切入点*/ 
@@ -52,9 +50,9 @@ public class SensitizationAspect {
     		return ob;
     	}
     	logger.info("sensitization result");
-    	SensitizationItemVo defaultSensitizationItem = SensitizationUtil.buildDefaultSensitizationItemVo(sensitization.defaultSupport().length == 0?null:sensitization.defaultSupport()[0], 
-    			sensitization.defaultEnv().length == 0?null:sensitization.defaultEnv()[0]);
-    	ob = SensitizationUtil.encrypt(ob, wrapperSupportList, defaultSensitizationItem, sensitization.map(), sensitization.groups());
+    	SensitiveRequestContext context = new SensitiveRequestContext(sensitization.groups());
+    	HttpServletRequest request = ServletUtil.getRequest();
+    	request.setAttribute(SensitiveRequestContext.SENSITIVE_REQUEST_KEY, context);
     	
     	return ob;
     }

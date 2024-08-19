@@ -1,6 +1,8 @@
 package org.sonicframework.utils.sensitization;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -32,6 +34,7 @@ import org.sonicframework.context.sensitization.annotation.SensitizationEnv;
 public class SensitizationUtil {
 
 	private static Map<Class<?>, List<SensitizationItemVo>> cacheMap = new ConcurrentHashMap<>();
+	private static Map<Class<?>, Constructor<? extends SensitizationSupport>> supportConstructorMap = new ConcurrentHashMap<>();
 
 	private SensitizationUtil() {
 	}
@@ -62,29 +65,10 @@ public class SensitizationUtil {
 
 	}
 	
-	private static SensitizationItemVo buildSensitizationItemVo(String key, FieldSensitization anno) {
-		SensitizationItemVo vo = new SensitizationItemVo();
+	public static SensitizationItemVo buildSensitizationItemVo(String key, FieldSensitization anno) {
+		SensitizationItemVo vo = buildDefaultSensitizationItemVo(anno.support().length == 0?null:anno.support()[0], anno.env().length == 0?null:anno.env()[0]);
 		vo.setFieldName(key);
 		vo.setGroups(anno.groups());
-		try {
-			vo.setSupport(anno.support().newInstance());
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new DevelopeCodeException("can not instance class:" + anno.support(), e);
-		}
-		SensitizationEnv[] envs = anno.env();
-//		if (ArrayUtils.isEmpty(envs)) {
-//			throw new DevelopeCodeException("there is no env in annotation FieldSensitization where parse field: "
-//					+ key + " in class:" + anno.support());
-//		}
-		Env env = new Env();
-		if(ArrayUtils.isNotEmpty(envs)) {
-			env.setEnd(envs[0].end());
-			env.setPattern(envs[0].pattern());
-			env.setStart(envs[0].start());
-			env.setMask(envs[0].mask());
-			env.setMaskRepeat(envs[0].maskRepeat());
-		}
-		vo.setEnv(env);
 		return vo;
 	}
 	public static SensitizationItemVo buildDefaultSensitizationItemVo(Class<?extends SensitizationSupport> clazz, SensitizationEnv envAnno) {
@@ -93,8 +77,8 @@ public class SensitizationUtil {
 		}
 		SensitizationItemVo vo = new SensitizationItemVo();
 		try {
-			vo.setSupport(clazz.newInstance());
-		} catch (InstantiationException | IllegalAccessException e) {
+			vo.setSupport(newInstance(clazz));
+		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException e) {
 			throw new DevelopeCodeException("can not instance class:" + clazz, e);
 		}
 		Env env = new Env();
@@ -169,6 +153,13 @@ public class SensitizationUtil {
 			obj = executeEncrypt(obj, descMap, defaultSupport, extendMap, groups);
 		}
 		return obj;
+	}
+	public static <T> String encryptString(String value, SensitizationItemVo defaultSupport) {
+		if (value == null) {
+			return value;
+		}
+		value = defaultSupport.getSupport().serializ(value, defaultSupport.getEnv());
+		return value;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -272,6 +263,15 @@ public class SensitizationUtil {
 			map.put(entry.getKey(), resultVal);
 		}
 		return map;
+	}
+	
+	private static SensitizationSupport newInstance(Class<? extends SensitizationSupport> clazz) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		if(supportConstructorMap.containsKey(clazz)) {
+			return supportConstructorMap.get(clazz).newInstance();
+		}
+		Constructor<? extends SensitizationSupport> constructor = clazz.getConstructor();
+		supportConstructorMap.put(clazz, constructor);
+		return constructor.newInstance();
 	}
 
 }

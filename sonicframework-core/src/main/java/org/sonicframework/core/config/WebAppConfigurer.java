@@ -14,6 +14,8 @@ import javax.servlet.Filter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sonicframework.core.encrypt.EncryptResponseHandlerInterceptor;
+import org.sonicframework.core.sensitization.SensitiveJsonSerializer;
+import org.sonicframework.core.sensitization.SensitizationConfig;
 import org.sonicframework.core.webapi.ResponseResultHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -66,6 +68,8 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 	private EncryptResponseHandlerInterceptor<?> encryptResponseHandlerInterceptor;
 	@Autowired
 	private WebConfig webConfig;
+	@Autowired
+	private SensitizationConfig sensitizationConfig;
 	
 	@Override
 	public void configurePathMatch(PathMatchConfigurer configurer) {
@@ -150,6 +154,15 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 				super.writeInternal(object, type, outputMessage);
 			}
 		};
+		
+		if(sensitizationConfig.isEnable()) {
+			ObjectMapper objectMapper = converter.getObjectMapper();
+			SimpleModule simpleModule = new SimpleModule();
+			simpleModule.addSerializer(String.class, new SensitiveJsonSerializer());
+			objectMapper.registerModule(simpleModule);
+		}
+		
+		
 		converter.setSupportedMediaTypes(new ArrayList<>(Arrays.asList(MediaType.APPLICATION_JSON,
 				new MediaType("application", "*+json"), MediaType.TEXT_HTML)));
 		converters.add(0, converter);

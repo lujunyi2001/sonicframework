@@ -19,7 +19,7 @@ public class LastFixedPatternSensitization implements SensitizationSupport {
 			suffix = val.substring(index);
 			val = val.substring(0, index);
 		}
-		return NormalSensitization.getStarString(val, env.getStart(), 0, env) + suffix;
+		return NormalSensitization.getStarString(val, env.getStart(), env.getEnd(), env) + suffix;
 	}
 
 	

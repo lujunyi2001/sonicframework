@@ -19,7 +19,7 @@ public class FirstFixedPatternSensitization implements SensitizationSupport {
 			prefix = val.substring(0, index + 1);
 			val = val.substring(index + 1);
 		}
-		return prefix + NormalSensitization.getStarString(val, env.getStart(), 0, env);
+		return prefix + NormalSensitization.getStarString(val, env.getStart(), env.getEnd(), env);
 	}
 
 	

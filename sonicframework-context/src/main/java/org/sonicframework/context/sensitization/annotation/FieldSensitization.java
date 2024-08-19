@@ -19,7 +19,7 @@ import org.sonicframework.context.sensitization.SensitizationSupport;
 public @interface FieldSensitization {
 
 	String key() default "";
-	Class<? extends SensitizationSupport> support();
+	Class<? extends SensitizationSupport>[] support() default {};
 	SensitizationEnv[] env() default {};
 	Class<?>[] groups() default {};
 }
