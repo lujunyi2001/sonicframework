@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,8 +51,6 @@ import org.sonicframework.utils.mapper.MapperContext;
 import org.sonicframework.utils.mapper.MapperDescVo;
 import org.sonicframework.utils.mapper.PostMapper;
 import org.springframework.beans.BeanWrapper;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 import org.sonicframework.context.common.annotation.Style;
 import org.sonicframework.context.common.enums.Border;

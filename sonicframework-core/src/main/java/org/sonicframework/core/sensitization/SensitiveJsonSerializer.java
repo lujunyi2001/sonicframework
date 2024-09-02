@@ -1,6 +1,7 @@
 package org.sonicframework.core.sensitization;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -21,8 +22,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
 * @author lujunyi
