@@ -2,10 +2,10 @@ package org.sonicframework.utils.excel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 
-import com.google.inject.internal.util.Objects;
 
 /**
  * @author lujunyi
@@ -134,7 +134,7 @@ public class ColumnVo {
 			this.preVal = val;
 			this.rowspanStart = rowNum;
 			this.rowspanEnd = null;
-		} else if (!Objects.equal(preVal, val)) {
+		} else if (!Objects.equals(preVal, val)) {
 			if (this.rowspanEnd != null) {
 				addRegon();
 			}
