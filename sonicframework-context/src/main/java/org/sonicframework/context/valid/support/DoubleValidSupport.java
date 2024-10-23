@@ -102,7 +102,7 @@ public class DoubleValidSupport implements ConstraintValidator<DoubleValid, Doub
 		}
 		NumberFormat format = NumberFormat.getInstance();
 		format.setGroupingUsed(false);
-		format.setMaximumFractionDigits(maxDecimalLen + 2);
+		format.setMaximumFractionDigits(100);
 		String str = format.format(number);
 		String[] split = str.split("\\.");
 		return split.length > 1?split[1].trim().length():0;
