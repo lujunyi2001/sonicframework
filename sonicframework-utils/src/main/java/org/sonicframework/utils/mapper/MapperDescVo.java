@@ -42,6 +42,8 @@ public class MapperDescVo implements Serializable{
 	private Class<? extends SerializeSupport<?, ?>> serializeSupportClazz;
 	private Class<?>[] groups = new Class<?>[0];
 	private int length;
+	private int scales;
+	private String alias;
 	private Style[] titleStyles;
 	private Style contentStyle;
 	
@@ -233,5 +235,17 @@ public class MapperDescVo implements Serializable{
 	}
 	public void setContentStyle(Style contentStyle) {
 		this.contentStyle = contentStyle;
+	}
+	public int getScales() {
+		return scales;
+	}
+	public void setScales(int scales) {
+		this.scales = scales;
+	}
+	public String getAlias() {
+		return alias;
+	}
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 }

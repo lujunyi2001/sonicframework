@@ -23,7 +23,7 @@ public class TestDto extends BaseDto {
 
 	private static final long serialVersionUID = 3523538263638783679L;
 	@StringType(nullable = false, max = 50, blankable = false, fieldLabel = "str", groups = {})
-	@FieldMapper(field = "STR", dictName = "dict1", order = 5)
+	@FieldMapper(field = "STR", dictName = "dict1", label = "字段1", order = 5)
 	@DictFillupMapper(dictName = "a", target = "str2", bindType = DictCodeBindType.VALUE)
 	@DictFillupMapper(dictName = "a", target = "str3", bindType = DictCodeBindType.PARAM1)
 	private String str;

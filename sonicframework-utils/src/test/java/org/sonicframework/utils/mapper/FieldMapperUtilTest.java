@@ -25,10 +25,11 @@ public class FieldMapperUtilTest {
 	@Test
 	public void testImportMapper() {
 		MapperContext<TestDto> context = MapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
-		context = context.setValidEnable(true);
+		context.setDictNotMappedHandler(t->System.out.println(t.getDictName() + "===" + t.getLabel() + "===" + t.getMapValue()));
+		context = context.setValidEnable(false);
 		Date date = new Date();
 		Map<String, Object> data = new HashMap<>();
-		data.put("STR", "名称3");
+		data.put("STR", "名称8");
 		data.put("DOU", 1D);
 		data.put("DAT", date);
 		data.put("EXT1", "ext1");

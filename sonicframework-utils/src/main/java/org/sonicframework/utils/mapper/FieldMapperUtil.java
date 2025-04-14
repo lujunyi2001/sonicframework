@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -112,6 +113,10 @@ public class FieldMapperUtil {
 				}
 				vo.setGroups(fieldMapper.groups());
 				vo.setLength(fieldMapper.length());
+				vo.setScales(fieldMapper.scales());
+				if(StringUtils.isNotBlank(fieldMapper.alias())) {
+					vo.setAlias(fieldMapper.alias());
+				}
 				vo.setTitleStyles(fieldMapper.titleStyle());
 				vo.setContentStyle(ArrayUtils.isEmpty(fieldMapper.contentStyle())?null:fieldMapper.contentStyle()[0]);
 				result.add(vo);
@@ -151,6 +156,10 @@ public class FieldMapperUtil {
 			}
 			vo.setGroups(mapper.groups());
 			vo.setLength(mapper.length());
+			vo.setScales(mapper.scales());
+			if(StringUtils.isNotBlank(mapper.alias())) {
+				vo.setAlias(mapper.alias());
+			}
 			vo.setTitleStyles(mapper.titleStyle());
 			vo.setContentStyle(ArrayUtils.isEmpty(mapper.contentStyle())?null:mapper.contentStyle()[0]);
 			result.add(vo);
@@ -235,6 +244,12 @@ public class FieldMapperUtil {
 		}, LinkedHashMap::new, Collectors.toList()));
 		return result;
 	}
+	private static Map<String, MapperDescVo> getAliasFromDescMap(Class<?> clazz, Class<?>...groups){
+		List<MapperDescVo> parseDesc = parseDescByGroups(clazz, groups);
+		Map<String, MapperDescVo> result = parseDesc.stream().filter(t->StringUtils.isNotBlank(t.getAlias()))
+				.collect(Collectors.toMap(MapperDescVo::getAlias, t->t, (o1, o2)->o2));
+		return result;
+	}
 	
 	private static boolean hasAction(MapperDescVo desc, int action) {
 		return (desc.getAction() & action)== action;
@@ -268,13 +283,30 @@ public class FieldMapperUtil {
 		}
 		refreshContext(context);
 		Map<String, List<MapperDescVo>> descMap = getFromDescMap(context.getClazz(), context.getGroups());
+		Map<String, MapperDescVo> aliasDescMap = getAliasFromDescMap(context.getClazz(), context.getGroups());
 		
-		DictCodeDto code = null;
 		BeanWrapper bean = new BeanWrapperImpl(entity);
-		Object val = null;
 		Object oringinVal = null;
-		SerializeSupport<Object, Object> serializeSupport = null;
-		Map<String, DictCodeDto> codeMap = null;
+		
+		if(!aliasDescMap.isEmpty()) {
+			MapperDescVo desc = null;
+			for (Map.Entry<String, Object> entry : data.entrySet()) {
+				if(entry.getValue() == null) {
+					continue;
+				}
+				oringinVal = entry.getValue();
+				if(!aliasDescMap.containsKey(entry.getKey())) {
+					continue;
+				}
+				if(oringinVal instanceof String && StringUtils.isBlank((String)oringinVal)) {
+					continue;
+				}
+				desc = aliasDescMap.get(entry.getKey());
+				populateValue(bean, oringinVal, desc, context);
+			}
+		}
+		
+		
 		for (Map.Entry<String, Object> entry : data.entrySet()) {
 			if(entry.getValue() == null) {
 				continue;
@@ -287,70 +319,8 @@ public class FieldMapperUtil {
 				continue;
 			}
 			List<MapperDescVo> descList = descMap.get(entry.getKey());
-			Match[] matches = null;
-			String[] tmpKeys = null;
 			for (MapperDescVo desc : descList) {
-				if(!hasAction(desc, FieldMapperConst.MAPPER_IMPORT)) {
-					continue;
-				}
-				val = oringinVal;
-				serializeSupport = (SerializeSupport<Object, Object>) context.getSerializeSupport(desc);
-				if(serializeSupport == null) {
-					if(desc.getLocalClass().isAssignableFrom(val.getClass())) {
-						
-					}else if(val instanceof Date && desc.getLocalClass() == String.class){
-						val = DateFormatUtils.format((Date)val, StringUtils.isNotBlank(desc.getFormat())?desc.getFormat():"yyyy-MM-dd");
-					}else if(val instanceof String && desc.getLocalClass().isAssignableFrom(Date.class)) {
-						val = ConvertFactory.convertToObject((String)val, Date.class);
-					}else if(val instanceof Number){
-						NumberFormat nf = NumberFormat.getInstance();
-						nf.setGroupingUsed(false);
-						nf.setMaximumFractionDigits(10);
-						val = nf.format(val);
-					}else {
-						val = String.valueOf(val);
-					}
-					
-					if(val != null && StringUtils.isNotBlank(desc.getDictName())) {
-						code = null;
-						codeMap = context.getDictMapByType(desc.getDictName());
-						if(StringUtils.isEmpty(desc.getSplitSep()) && StringUtils.isEmpty(desc.getSplitImpSep())) {
-							code = codeMap.get(val);
-							val = code == null?null:code.getCode();
-						}else {
-							final Map<String, DictCodeDto> finalCodeMap = codeMap;
-							tmpKeys = String.valueOf(val).split(StringUtils.isNotEmpty(desc.getSplitImpSep())?desc.getSplitImpSep():desc.getSplitSep());
-							List<String> valList = Stream.of(tmpKeys).map(t->finalCodeMap.containsKey(t)?finalCodeMap.get(t).getCode():null).collect(Collectors.toList());
-							if(desc.isSplitNoMatch2Null() && valList.stream().anyMatch(t->t == null)) {
-								val = null;
-//								valList.forEach(t->System.out.println(t));
-							}else {
-								val = valList.stream().filter(t->t != null)
-										.collect(Collectors.joining(StringUtils.isNotEmpty(desc.getSplitSep())?desc.getSplitSep():desc.getSplitImpSep()));
-							}
-							
-							if(val != null && (val instanceof String) && StringUtils.isEmpty((String)val)) {
-								val = null;
-							}
-							
-						}
-						
-					}
-				}else {
-					Object param = val;
-					val = serializeSupport.deserialize(param);
-				}
-				matches = desc.getMatch();
-				if(ArrayUtils.isNotEmpty(matches)) {
-					String matchVal = String.valueOf(val);
-					for (int i = 0; i < matches.length; i++) {
-						if(Objects.equals(matches[i].val(), matchVal)) {
-							val = matches[i].key();
-							break;
-						}
-					}
-				}
-				bean.setPropertyValue(desc.getLocalName(), val);
+				populateValue(bean, oringinVal, desc, context);
 			}
 			
 		}
@@ -364,8 +334,95 @@ public class FieldMapperUtil {
 		return entity;
 	}
 	
-	public static Map<String, Class<?>> buildToFieldClassMap(Class<?> clazz, Class<?>...groups){
-		Map<String, Class<?>> result = new LinkedHashMap<>();
+	@SuppressWarnings("unchecked")
+	private static <T>void populateValue(BeanWrapper bean, Object oringinVal, MapperDescVo desc, MapperContext<T> context) {
+		if(!hasAction(desc, FieldMapperConst.MAPPER_IMPORT)) {
+			return;
+		}
+		DictCodeDto code = null;
+		Map<String, DictCodeDto> codeMap = null;
+		Match[] matches = null;
+		String[] tmpKeys = null;
+		Object val = oringinVal;
+		SerializeSupport<Object, Object> serializeSupport = (SerializeSupport<Object, Object>) context.getSerializeSupport(desc);
+		
+		serializeSupport = (SerializeSupport<Object, Object>) context.getSerializeSupport(desc);
+		if(serializeSupport == null) {
+			if(desc.getLocalClass().isAssignableFrom(val.getClass())) {
+				
+			}else if(val instanceof Date && desc.getLocalClass() == String.class){
+				val = DateFormatUtils.format((Date)val, StringUtils.isNotBlank(desc.getFormat())?desc.getFormat():"yyyy-MM-dd");
+			}else if(val instanceof String && desc.getLocalClass().isAssignableFrom(Date.class)) {
+				val = ConvertFactory.convertToObject((String)val, Date.class);
+			}else if(val instanceof Number){
+				NumberFormat nf = NumberFormat.getInstance();
+				nf.setGroupingUsed(false);
+				nf.setMaximumFractionDigits(10);
+				val = nf.format(val);
+			}else {
+				val = String.valueOf(val);
+			}
+			
+			if(val != null && StringUtils.isNotBlank(desc.getDictName())) {
+				Consumer<DictMapContext<T>> dictNotMappedHandler = context.getDictNotMappedHandler();
+				code = null;
+				codeMap = context.getDictMapByType(desc.getDictName());
+				if(StringUtils.isEmpty(desc.getSplitSep()) && StringUtils.isEmpty(desc.getSplitImpSep())) {
+					code = codeMap.get(val);
+					if(code == null && dictNotMappedHandler != null) {
+						DictMapContext<T> dictMappContext = new DictMapContext<T>((T)bean.getWrappedInstance(), desc.getLabel(), desc.getDictName(), desc.getLocalName(), String.valueOf(val));
+						dictNotMappedHandler.accept(dictMappContext);
+						val = dictMappContext.getDefaultValue();
+					}else {
+						val = code == null?null:code.getCode();
+					}
+					
+				}else {
+					final Map<String, DictCodeDto> finalCodeMap = codeMap;
+					tmpKeys = String.valueOf(val).split(StringUtils.isNotEmpty(desc.getSplitImpSep())?desc.getSplitImpSep():desc.getSplitSep());
+					List<String> valList = Stream.of(tmpKeys).map(t->{
+						String r = finalCodeMap.containsKey(t)?finalCodeMap.get(t).getCode():null;
+						if(r == null) {
+							DictMapContext<T> dictMappContext = new DictMapContext<T>((T)bean.getWrappedInstance(), desc.getLabel(), desc.getDictName(), desc.getLocalName(), t);
+							dictNotMappedHandler.accept(dictMappContext);
+							r = dictMappContext.getDefaultValue();
+						}
+						return r;
+					}).collect(Collectors.toList());
+					if(desc.isSplitNoMatch2Null() && valList.stream().anyMatch(t->t == null)) {
+						val = null;
+//						valList.forEach(t->System.out.println(t));
+					}else {
+						val = valList.stream().filter(t->t != null)
+								.collect(Collectors.joining(StringUtils.isNotEmpty(desc.getSplitSep())?desc.getSplitSep():desc.getSplitImpSep()));
+					}
+					
+					if(val != null && (val instanceof String) && StringUtils.isEmpty((String)val)) {
+						val = null;
+					}
+					
+				}
+				
+			}
+		}else {
+			Object param = val;
+			val = serializeSupport.deserialize(param);
+		}
+		matches = desc.getMatch();
+		if(ArrayUtils.isNotEmpty(matches)) {
+			String matchVal = String.valueOf(val);
+			for (int i = 0; i < matches.length; i++) {
+				if(Objects.equals(matches[i].val(), matchVal)) {
+					val = matches[i].key();
+					break;
+				}
+			}
+		}
+		bean.setPropertyValue(desc.getLocalName(), val);
+	}
+	
+	public static Map<String, MapperColumnDesc> buildToFieldClassMap(Class<?> clazz, Class<?>...groups){
+		Map<String, MapperColumnDesc> result = new LinkedHashMap<>();
 		Map<String, List<MapperDescVo>> descMap = getFromDescMap(clazz, groups);
 		List<MapperDescVo> list = null;
 		for (Map.Entry<String, List<MapperDescVo>> entry : descMap.entrySet()) {
@@ -374,9 +431,9 @@ public class FieldMapperUtil {
 			for (MapperDescVo vo : list) {
 				if(vo.getSerializeSupportClazz() == null) {
 					if(vo.getTargetClass() != null) {
-						result.put(entry.getKey(), vo.getTargetClass());
+						result.put(entry.getKey(), new MapperColumnDesc(vo.getTargetClass(), vo.getLength(), vo.getScales(), vo.getAlias()));
 					}else{
-						result.put(entry.getKey(), vo.getLocalClass());
+						result.put(entry.getKey(), new MapperColumnDesc(vo.getLocalClass(), vo.getLength(), vo.getScales(), vo.getAlias()));
 					}
 				}else {
 					Class<?> returnType = null;
@@ -400,7 +457,7 @@ public class FieldMapperUtil {
 					if(returnType == null) {
 						throw new DevelopeCodeException("can not find the method name 'serialize' in class:" + serializeSupportClazz);
 					}
-					result.put(entry.getKey(), returnType);
+					result.put(entry.getKey(), new MapperColumnDesc(returnType, vo.getLength(), vo.getScales(), vo.getAlias()));
 				}
 			}
 		}
@@ -409,7 +466,7 @@ public class FieldMapperUtil {
 	
 	public static <T> void init(MapperContext<T> context) {
 		refreshContext(context);
-		Map<String, Class<?>> fieldClassMap = context.getActualFieldClassMap();
+		Map<String, MapperColumnDesc> fieldClassMap = context.getActualFieldClassMap();
 		if(fieldClassMap == null) {
 			fieldClassMap = buildToFieldClassMap(context.getClazz(), context.getGroups());
 			context.setFieldClassMap(fieldClassMap);
@@ -418,7 +475,7 @@ public class FieldMapperUtil {
 	
 	public static <T>Map<String, Object> buildToFieldDataMap(Object data, MapperContext<T> context){
 		init(context);
-		Map<String, Class<?>> fieldClassMap = context.getActualFieldClassMap();
+		Map<String, MapperColumnDesc> fieldClassMap = context.getActualFieldClassMap();
 		Map<String, Object> result = new HashMap<>();
 		Map<String, List<MapperDescVo>> fromDescMap = getFromDescMap(context.getClazz(), context.getGroups());
 		List<MapperDescVo> list = null;
@@ -437,7 +494,7 @@ public class FieldMapperUtil {
 			if(list.size() == 1) {
 				desc = list.get(0);
 			}else {
-				Class<?> returnType = fieldClassMap.get(entry.getKey());
+				Class<?> returnType = fieldClassMap.get(entry.getKey()).getType();
 				Optional<MapperDescVo> findFirst = list.stream().filter(t->returnType.isAssignableFrom(t.getLocalClass())).findFirst();
 				if(!findFirst.isPresent()) {
 					throw new DevelopeCodeException("can not found FieldMapper or ClassFieldMapper with field '" + entry.getKey() + "'" );

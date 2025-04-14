@@ -54,7 +54,6 @@ import org.springframework.beans.BeanWrapper;
 
 import org.sonicframework.context.common.annotation.Style;
 import org.sonicframework.context.common.enums.Border;
-import org.sonicframework.context.exception.DataNotValidException;
 import org.sonicframework.context.exception.DevelopeCodeException;
 import org.sonicframework.context.exception.ExportFailException;
 import org.sonicframework.context.exception.FileCheckException;
@@ -350,7 +349,6 @@ public class ExcelUtil {
 			throw new ExportFailException(ExportFailException.MESSAGE, e);
 		}
 	}
-	@SuppressWarnings("unchecked")
 	private static Sheet createSheetByTitle(String[][] titleMartix, int rowNum, Sheet sheet, CellStyle[][] titleStyleMartix, int[] columnSize) {
 		int startRowNum = rowNum;
 		try {
@@ -604,11 +602,17 @@ public class ExcelUtil {
 
 			ValidateResult validateResult = null;
 			if (validEnable) {
-				try {
+				/*try {
 					ValidationUtil.checkValid(entity, validGroups);
 					validateResult = new ValidateResult(true, null);
 				} catch (DataNotValidException e) {
 					validateResult = new ValidateResult(false, e.getMessage());
+				}*/
+				List<String> errMsgList = ValidationUtil.valid(entity, validGroups);
+				if(errMsgList.isEmpty()) {
+					validateResult = new ValidateResult(true, null);
+				}else {
+					validateResult = new ValidateResult(false, StringUtils.join(errMsgList, ","), errMsgList);
 				}
 			} else {
 				validateResult = new ValidateResult(true, null);

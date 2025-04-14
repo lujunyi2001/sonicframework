@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -26,10 +27,11 @@ public class MapperContext<T> {
 	protected Class<?>[] validGroups = new Class[0];
 	protected Map<MapperDescVo, SerializeSupport<? extends Object, ? extends Object>> serializeSupportMap = new ConcurrentHashMap<>();
 	protected Class<?>[] groups = new Class<?>[0];
-	protected Map<String, Class<?>> fieldClassMap = null;
+	protected Map<String, MapperColumnDesc> fieldClassMap = null;
 	protected int titleIndex = 0;
 	protected int titleEndIndex = -1;
 	protected String mapperName;
+	protected Consumer<DictMapContext<T>> dictNotMappedHandler;
 	
 	protected MapperContext() {}
 	
@@ -155,14 +157,14 @@ public class MapperContext<T> {
 		this.groups = groups;
 	}
 
-	Map<String, Class<?>> getActualFieldClassMap() {
+	Map<String, MapperColumnDesc> getActualFieldClassMap() {
 		return fieldClassMap;
 	}
-	public Map<String, Class<?>> getFieldClassMap() {
+	public Map<String, MapperColumnDesc> getFieldClassMap() {
 		return fieldClassMap == null?null:new LinkedHashMap<>(fieldClassMap);
 	}
 
-	void setFieldClassMap(Map<String, Class<?>> fieldClassMap) {
+	void setFieldClassMap(Map<String, MapperColumnDesc> fieldClassMap) {
 		this.fieldClassMap = fieldClassMap;
 	}
 
@@ -189,6 +191,14 @@ public class MapperContext<T> {
 
 	public void setTitleEndIndex(int titleEndIndex) {
 		this.titleEndIndex = titleEndIndex;
+	}
+
+	public void setDictNotMappedHandler(Consumer<DictMapContext<T>> dictNotMappedHandler) {
+		this.dictNotMappedHandler = dictNotMappedHandler;
+	}
+
+	public Consumer<DictMapContext<T>> getDictNotMappedHandler() {
+		return dictNotMappedHandler;
 	}
 
 }
