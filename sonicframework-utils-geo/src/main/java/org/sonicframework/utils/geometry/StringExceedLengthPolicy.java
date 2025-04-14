@@ -1,7 +1,6 @@
 package org.sonicframework.utils.geometry;
 
 import java.io.UnsupportedEncodingException;
-import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sonicframework.utils.StringExtendUtil;
@@ -11,7 +10,7 @@ import org.sonicframework.utils.StringExtendUtil;
 */
 public enum StringExceedLengthPolicy {
 
-	DEFAULT((str, charsetName)->{
+	DEFAULT((str, charsetName, length)->{
 		byte[] sourceBytes = null;
 		if(StringUtils.isNotBlank(charsetName)) {
 			try {
@@ -27,7 +26,7 @@ public enum StringExceedLengthPolicy {
 		}
 		return str;
 	}),
-	NULL((str, charsetName)->{
+	NULL((str, charsetName, length)->{
 		byte[] sourceBytes = null;
 		if(StringUtils.isNotBlank(charsetName)) {
 			try {
@@ -43,17 +42,21 @@ public enum StringExceedLengthPolicy {
 		}
 		return str;
 	}),
-	SUBSTRING((str, charsetName)->{
-		return StringExtendUtil.subtringByByteNum(str, charsetName, 253);
+	SUBSTRING((str, charsetName, length)->{
+		int subLength = length;
+		if(length <= 0) {
+			subLength = 253;
+		}
+		return StringExtendUtil.subtringByByteNum(str, charsetName, subLength);
 	});
 	
 	
-	private BiFunction<String, String, String> policy;
-	private StringExceedLengthPolicy(BiFunction<String, String, String> policy) {
+	private ThreeParamFunction<String, String, Integer, String> policy;
+	private StringExceedLengthPolicy(ThreeParamFunction<String, String, Integer, String> policy) {
 		this.policy = policy;
 	}
 	
-	public String renderResult(String str, String charsetName) {
-		return this.policy.apply(str, charsetName);
+	public String renderResult(String str, String charsetName, int length) {
+		return this.policy.apply(str, charsetName, length);
 	}
 }

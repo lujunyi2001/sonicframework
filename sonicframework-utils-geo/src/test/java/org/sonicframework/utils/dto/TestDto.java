@@ -34,12 +34,12 @@ public class TestDto extends BaseDto {
 	private String str2;
 	private String str3;
 	@DoubleValid(nullable = false, zeroable = false)
-	@FieldMapper(field = "DOU", order = 2)
+	@FieldMapper(field = "DOU", length = 15, scales = 4, order = 2)
 	private Double dou;
-	@FieldMapper(field = "中文字", order = -1)
+	@FieldMapper(field = "中文字", length = 6, order = -1)
 	private String chnVal;
 	
-	@FieldMapper(field = "DAT", order = 10, format = "yyyy-MM-dd")
+	@FieldMapper(field = "DAT", length = 70, order = 10, format = "yyyy-MM-dd")
 	private Date dat;
 	
 	private String ext1;

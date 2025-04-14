@@ -100,11 +100,17 @@ public class GdbUtil {
 			T entity = GeoFieldMapperUtil.importMapper(t, context, postMapper);
 			ValidateResult validateResult = null;
 			if (validEnable) {
-				try {
+				/*try {
 					ValidationUtil.checkValid(entity, validGroups);
 					validateResult = new ValidateResult(true, null);
 				} catch (DataNotValidException e) {
 					validateResult = new ValidateResult(false, e.getMessage());
+				}*/
+				List<String> errMsgList = ValidationUtil.valid(entity, validGroups);
+				if(errMsgList.isEmpty()) {
+					validateResult = new ValidateResult(true, null);
+				}else {
+					validateResult = new ValidateResult(false, StringUtils.join(errMsgList, ","), errMsgList);
 				}
 			} else {
 				validateResult = new ValidateResult(true, null);
@@ -155,6 +161,7 @@ public class GdbUtil {
 			for (int i = 0; i < fieldCount; i++) {
 				fieldDefnRef = feature.GetFieldDefnRef(i);
 				record = new ShpRecordVo(fieldDefnRef.GetName(), getProperty(feature, i), getPropertyType(feature, i));
+//				record.setAlias(fieldDefnRef.GetAlternativeName());
 				recordList.add(record);
 			}
 			exportToWkt = feature.GetGeometryRef().ExportToWkt();

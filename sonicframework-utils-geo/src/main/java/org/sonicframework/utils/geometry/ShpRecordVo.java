@@ -10,6 +10,7 @@ public class ShpRecordVo extends BaseDto{
 	private String name;
 	private Object value;
 	private Class<?> type;
+	private String alias;
 	
 	public ShpRecordVo(String name, Object value, Class<?> type) {
 		super();
@@ -50,5 +51,11 @@ public class ShpRecordVo extends BaseDto{
 	}
 	public void setType(Class<?> type) {
 		this.type = type;
+	}
+	public String getAlias() {
+		return alias;
+	}
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 }

@@ -37,6 +37,8 @@ public @interface ClassFieldMapper {
 	Class<? extends SerializeSupport<?, ?>>[] serialize() default{};
 	Class<?>[] groups() default{};
 	int length() default 0;
+	int scales() default 0;
+	String alias() default "";
 	Style[] titleStyle() default {};
 	Style[] contentStyle() default {};
 }

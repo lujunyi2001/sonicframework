@@ -3,7 +3,9 @@ package org.sonicframework.utils.geometry.mapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sonicframework.utils.ValidationUtil;
 import org.sonicframework.utils.geometry.ShpInfoVo;
 import org.sonicframework.utils.geometry.ShpRecordVo;
@@ -25,6 +27,10 @@ public class GeoFieldMapperUtil {
 	public static <T>T importMapper(ShpInfoVo vo, MapperContext<T> context, PostMapper<T, ShpInfoVo> postMapper) {
 		List<ShpRecordVo> list = vo.getRecordList();
 		Map<String, Object> data = new HashMap<>();
+		List<ShpRecordVo> aliasRecordList = list.stream().filter(t->StringUtils.isNotBlank(t.getAlias())).collect(Collectors.toList());
+		for (ShpRecordVo record : aliasRecordList) {
+			data.put(record.getAlias(), record.getValue());
+		}
 		for (ShpRecordVo record : list) {
 			data.put(record.getName(), record.getValue());
 		}

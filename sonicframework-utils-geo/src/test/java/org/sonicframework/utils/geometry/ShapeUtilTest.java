@@ -75,9 +75,10 @@ public class ShapeUtilTest {
 			System.out.println(t.getValue());
 			t.getException().printStackTrace();
 		});
+		exportShp.setStringExceedLengthPolicy(StringExceedLengthPolicy.SUBSTRING);
 		TestDto dto = new TestDto();
 		dto.setDat(new Date());
-		dto.setDou(1D);
+		dto.setDou(1.2345678D);
 		dto.setExt1("ext12345");
 		String str = "";
 		for (int i = 0; i < 100; i++) {
@@ -121,14 +122,14 @@ public class ShapeUtilTest {
 	
 	@Test
 	public void testExtractInfoEntity() {
-		String path = "E:\\test-data\\面-模板 (1)\\面";
+		String path = "e:\\GHFQ\\";
 //		List<String> geoJsonList = ShapeUtil.extractInfoGeoJson(path);
 //		for (String string : geoJsonList) {
 //			System.out.println(string);
 //		}
 		GeoMapperContext<TestDto> context = GeoMapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
 		context = (GeoMapperContext<TestDto>) context.setValidEnable(false);
-		context.setGroups(ShapeUtil.class);
+//		context.setGroups(ShapeUtil.class);
 		List<TestDto> list = new ArrayList<>();
 		ShapeUtil.extractInfoEntity(path, context, (t, r)->{
 			System.out.println(r);
@@ -145,6 +146,7 @@ public class ShapeUtilTest {
 			Map<String, Object> dataMap = FieldMapperUtil.buildToFieldDataMap(dto, context);
 			System.out.println(dataMap);
 		}
+		System.out.println("11111");
 		
 	}
 	@Test

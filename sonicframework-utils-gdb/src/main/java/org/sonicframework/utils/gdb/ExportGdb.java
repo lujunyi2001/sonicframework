@@ -48,6 +48,7 @@ import org.sonicframework.utils.geometry.ExportErrorPolicy;
 import org.sonicframework.utils.geometry.ExportShpDataEvent;
 import org.sonicframework.utils.geometry.GeometryUtil;
 import org.sonicframework.utils.mapper.FieldMapperUtil;
+import org.sonicframework.utils.mapper.MapperColumnDesc;
 import org.sonicframework.utils.mapper.MapperContext;
 
 /**
@@ -94,7 +95,7 @@ public class ExportGdb<T> {
 	private MapperContext<?> mapperContext;
 	private Layer gdbLayer;
 	private String geoKey = null;
-	private Map<String, Class<?>> fieldNameMap;
+	private Map<String, MapperColumnDesc> fieldNameMap;
 	
 	
 	public <L>ExportGdb<L> createNewLayer(String layerName, MapperContext<L> mapperContext, String geoKey){
@@ -157,7 +158,7 @@ public class ExportGdb<T> {
 		return getTopInstance().srid;
 	}
 
-	private void init(Map<String, Class<?>> fieldNameMap) {
+	private void init(Map<String, MapperColumnDesc> fieldNameMap) {
 		if(this.top == null) {
 			return;
 		}
@@ -170,7 +171,7 @@ public class ExportGdb<T> {
 			/******************* 输出gdb图层、表 ********************/
 			// gdb图层
 			int geoType = ogr.wkbPolygon;
-			Class<?> geoClass = this.fieldNameMap.get(this.geoKey);
+			Class<?> geoClass = this.fieldNameMap.get(this.geoKey).getType();
 			if (Polygon.class.isAssignableFrom(geoClass) || MultiPolygon.class.isAssignableFrom(geoClass)) {
 				geoType = ogr.wkbPolygon;
 			} else if (LineString.class.isAssignableFrom(geoClass)
@@ -190,14 +191,17 @@ public class ExportGdb<T> {
 			}
 			Layer gdbLayer = ds.CreateLayer(layName, sr, geoType, null);
 
-			for (Map.Entry<String, Class<?>> entry : fieldNameMap.entrySet()) {
+			for (Map.Entry<String, MapperColumnDesc> entry : fieldNameMap.entrySet()) {
 				if (Objects.equals(this.geoKey, entry.getKey())) {
 					continue;
 				}
 				FieldDefn fieldDefn = new FieldDefn();
 				fieldDefn.SetName(entry.getKey());
 //				fieldDefn.SetNullable(0);
-				fieldDefn.SetType(getFieldType(entry.getValue()));
+				fieldDefn.SetType(getFieldType(entry.getValue().getType()));
+				if(StringUtils.isNotBlank(entry.getValue().getAlias())) {
+					fieldDefn.SetAlternativeName(entry.getValue().getAlias());
+				}
 				gdbLayer.CreateField(fieldDefn);
 				this.gdbLayer = gdbLayer;
 			}
@@ -252,7 +256,7 @@ public class ExportGdb<T> {
 		geoClazz = (Class<? extends Geometry>) geo.getClass();
 		org.gdal.ogr.Geometry gdbGeo = org.gdal.ogr.Geometry.CreateFromWkt(geoStr);
 		if (this.gdbLayer == null) {
-			fieldNameMap.put(this.geoKey, geoClazz);
+			fieldNameMap.put(this.geoKey, new MapperColumnDesc(geoClazz));
 			init(fieldNameMap);
 		}
 		String key = null;
@@ -260,7 +264,7 @@ public class ExportGdb<T> {
 		try {
 			FeatureDefn featureDefn = this.gdbLayer.GetLayerDefn();
 			Feature feature = new Feature(featureDefn);
-			for (Map.Entry<String, Class<?>> entry : fieldNameMap.entrySet()) {
+			for (Map.Entry<String, MapperColumnDesc> entry : fieldNameMap.entrySet()) {
 				key = entry.getKey();
 				if (data.get(entry.getKey()) == null) {
 					continue;
@@ -372,7 +376,7 @@ public class ExportGdb<T> {
 		for (Entry<String, ExportGdb<?>> entry : entrySet) {
 			gdb = entry.getValue();
 			if(gdb.gdbLayer == null && topInstance.noDataEmptyGdb) {
-				gdb.fieldNameMap.put(gdb.geoKey, Polygon.class);
+				gdb.fieldNameMap.put(gdb.geoKey, new MapperColumnDesc(Polygon.class));
 				gdb.init(fieldNameMap);
 			}
 		}

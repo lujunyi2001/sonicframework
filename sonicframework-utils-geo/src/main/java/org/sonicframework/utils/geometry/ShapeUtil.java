@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -44,6 +45,7 @@ import org.sonicframework.utils.ValidationUtil;
 import org.sonicframework.utils.file.FileUtil;
 import org.sonicframework.utils.geometry.mapper.GeoFieldMapperUtil;
 import org.sonicframework.utils.geometry.mapper.GeoMapperContext;
+import org.sonicframework.utils.mapper.MapperColumnDesc;
 import org.sonicframework.utils.mapper.PostMapper;
 
 import org.sonicframework.context.exception.BaseBizException;
@@ -74,16 +76,30 @@ public class ShapeUtil {
 	private ShapeUtil() {}
 	
 	public static ExportShp<Map<String, Object>> buildNewExport(String path, String fileName, Map<String, Class<?>> fieldNameMap) {
-		return ExportShp.buildEmpty(path, fileName, fieldNameMap, DEFAULT_GEOKEY);
+		Map<String, MapperColumnDesc> convertMapperColumns = convertMapperColumns(fieldNameMap);
+		return ExportShp.buildEmpty(path, fileName, convertMapperColumns, DEFAULT_GEOKEY);
 	}
 	public static ExportShp<Map<String, Object>> buildNewExport(String path, String fileName, Map<String, Class<?>> fieldNameMap, String geoKey) {
-		return ExportShp.buildEmpty(path, fileName, fieldNameMap, geoKey);
+		Map<String, MapperColumnDesc> convertMapperColumns = convertMapperColumns(fieldNameMap);
+		return ExportShp.buildEmpty(path, fileName, convertMapperColumns, geoKey);
 	}
 	public static ExportShp<Map<String, Object>> buildNewExport(String path, String fileName, Map<String, Class<?>> fieldNameMap, String geoKey, String charset) {
-		return ExportShp.buildEmpty(path, fileName, fieldNameMap, geoKey, charset);
+		Map<String, MapperColumnDesc> convertMapperColumns = convertMapperColumns(fieldNameMap);
+		return ExportShp.buildEmpty(path, fileName, convertMapperColumns, geoKey, charset);
 	}
 	public static <T>ExportShp<T> buildNewExport(String path, String fileName, GeoMapperContext<T> context) {
 		return ExportShp.buildEmpty(path, fileName, context, DEFAULT_GEOKEY);
+	}
+	
+	private static Map<String, MapperColumnDesc> convertMapperColumns(Map<String, Class<?>> fieldNameMap){
+		if(fieldNameMap == null) {
+			return null;
+		}
+		LinkedHashMap<String , MapperColumnDesc> result = new LinkedHashMap<>();
+		for (Entry<String, Class<?>> entry : fieldNameMap.entrySet()) {
+			result.put(entry.getKey(), new MapperColumnDesc(entry.getValue().getClass()));
+		}
+		return result;
 	}
 	/**
 	 * 创建shape文件导出类
@@ -169,11 +185,17 @@ public class ShapeUtil {
 			T entity = GeoFieldMapperUtil.importMapper(t, context, postMapper);
 			ValidateResult validateResult = null;
 			if(validEnable) {
-				try {
+				/*try {
 					ValidationUtil.checkValid(entity, validGroups);
 					validateResult = new ValidateResult(true, null);
 				} catch (DataNotValidException e) {
 					validateResult = new ValidateResult(false, e.getMessage());
+				}*/
+				List<String> errMsgList = ValidationUtil.valid(entity, validGroups);
+				if(errMsgList.isEmpty()) {
+					validateResult = new ValidateResult(true, null);
+				}else {
+					validateResult = new ValidateResult(false, StringUtils.join(errMsgList, ","), errMsgList);
 				}
 			}else {
 				validateResult = new ValidateResult(true, null);

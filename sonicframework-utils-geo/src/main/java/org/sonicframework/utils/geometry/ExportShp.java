@@ -48,6 +48,7 @@ import org.sonicframework.utils.file.FileUtil;
 import org.sonicframework.utils.file.ZipUtil;
 import org.sonicframework.utils.geometry.mapper.GeoMapperContext;
 import org.sonicframework.utils.mapper.FieldMapperUtil;
+import org.sonicframework.utils.mapper.MapperColumnDesc;
 import org.sonicframework.context.exception.DataCheckException;
 import org.sonicframework.context.exception.DevelopeCodeException;
 import org.sonicframework.context.exception.ExportFailException;
@@ -56,7 +57,7 @@ import org.sonicframework.context.exception.ExportFailException;
 public class ExportShp<T> {
 
 	private File dicPath;
-	private Map<String, Class<?>> fieldNameMap;
+	private Map<String, MapperColumnDesc> fieldNameMap;
 	private Map<Class<? extends Geometry>, ExportShp<T>> instanceMap = new HashMap<>();
 	private FeatureWriter<SimpleFeatureType, SimpleFeature> writer;
 	private String geoKey = null;
@@ -68,6 +69,7 @@ public class ExportShp<T> {
 	private ExportErrorPolicy exportErrorPolicy;
 	private Consumer<ExportShpDataEvent<T>> exportErrorListener;
 	private boolean noDataEmptyShp;
+	private boolean multiGeoMerge = true;
 	
 	private final static String SHAPE_GEO_KEY = "the_geom";
 	private final static String SHAPE_FILE_EXTENDNAME = ".shp";
@@ -83,6 +85,8 @@ public class ExportShp<T> {
 //		} catch (Throwable e) {
 //		}
 		try {
+			ExportShp.class.getClassLoader().getSystemClassLoader().loadClass("org.geotools.data.shapefile.ShapefileDataStore");
+			ExportShp.class.getClassLoader().getSystemClassLoader().loadClass("org.geotools.data.shapefile.ShapefileFeatureSource");
 			ExportShp.class.getClassLoader().getSystemClassLoader().loadClass("org.geotools.data.shapefile.dbf.DbaseFileHeader");
 		} catch (Throwable e) {
 		}
@@ -96,10 +100,10 @@ public class ExportShp<T> {
 		instance.charset = charset;
 		return instance;
 	}
-	static ExportShp<Map<String, Object>> buildEmpty(String path, String fileName, Map<String, Class<?>> fieldNameMap, String geoKey) {
+	static ExportShp<Map<String, Object>> buildEmpty(String path, String fileName, Map<String, MapperColumnDesc> fieldNameMap, String geoKey) {
 		return buildEmpty(path, fileName, fieldNameMap, geoKey, "utf-8");
 	}
-	static ExportShp<Map<String, Object>> buildEmpty(String path, String fileName, Map<String, Class<?>> fieldNameMap, String geoKey, String charset) {
+	static ExportShp<Map<String, Object>> buildEmpty(String path, String fileName, Map<String, MapperColumnDesc> fieldNameMap, String geoKey, String charset) {
 		ExportShp<Map<String, Object>> instance = new ExportShp<Map<String, Object>>(path, fileName, fieldNameMap, geoKey);
 		instance.charset = charset;
 		return instance;
@@ -109,7 +113,7 @@ public class ExportShp<T> {
 
 	}
 	
-	private ExportShp(String path, String fileNamePrefix, Map<String, Class<?>> fieldNameMap, String geoKey) {
+	private ExportShp(String path, String fileNamePrefix, Map<String, MapperColumnDesc> fieldNameMap, String geoKey) {
 		File basePath = new File(path);
 		if (basePath.exists() && basePath.isFile()) {
 			if (basePath.isFile()) {
@@ -155,15 +159,20 @@ public class ExportShp<T> {
 	public void setNoDataEmptyShp(boolean noDataEmptyShp) {
 		this.noDataEmptyShp = noDataEmptyShp;
 	}
+	public void setMultiGeoMerge(boolean multiGeoMerge) {
+		this.multiGeoMerge = multiGeoMerge;
+	}
 
 	private synchronized ExportShp<T> buildShp(Class<? extends Geometry> geoClazz) {
 		if(geoClazz != null) {
-			if(geoClazz == Polygon.class) {
-				geoClazz = MultiPolygon.class;
-			}else if(geoClazz == LineString.class) {
-				geoClazz = MultiLineString.class;
-			}else  if(geoClazz == Point.class) {
-				geoClazz = MultiPoint.class;
+			if(multiGeoMerge) {
+				if(geoClazz == Polygon.class) {
+					geoClazz = MultiPolygon.class;
+				}else if(geoClazz == LineString.class) {
+					geoClazz = MultiLineString.class;
+				}else  if(geoClazz == Point.class) {
+					geoClazz = MultiPoint.class;
+				}
 			}
 		}
 		if (instanceMap.containsKey(geoClazz)) {
@@ -183,7 +192,7 @@ public class ExportShp<T> {
 		if(!instance.fieldNameMap.containsKey(this.geoKey)) {
 			throw new DevelopeCodeException("ExportShp keys not contains '" + this.geoKey + "'");
 		}
-		instance.fieldNameMap.put(this.geoKey, geoClazz);
+		instance.fieldNameMap.put(this.geoKey, new MapperColumnDesc(geoClazz));
 		instance.fileNamePrefix = this.fileNamePrefix;
 		instance.geoKey = this.geoKey;
 		instance.charset = this.charset;
@@ -194,11 +203,11 @@ public class ExportShp<T> {
 		return instance;
 	}
 
-	private void init(Map<String, Class<?>> fieldNameMap) {
+	private void init(Map<String, MapperColumnDesc> fieldNameMap) {
 		DbfCharsetContextHolder.set(charset);
 		try {
 			String className = this.fieldNameMap.get(this.geoKey) == null ? null
-					: this.fieldNameMap.get(this.geoKey).getSimpleName();
+					: this.fieldNameMap.get(this.geoKey).getType().getSimpleName();
 			String fileName = this.dicPath + "/" + this.fileNamePrefix + "_" + className + SHAPE_FILE_EXTENDNAME;
 			this.expFile = new File(fileName);
 			Map<String, Serializable> params = new HashMap<String, Serializable>();
@@ -208,8 +217,22 @@ public class ExportShp<T> {
 			CoordinateReferenceSystem crs = this.mapperContext.getCrs();
 			tb.setCRS(crs == null?DefaultGeographicCRS.WGS84:crs);
 			tb.setName("shapefile");
-			for (Map.Entry<String, Class<?>> entry : fieldNameMap.entrySet()) {
-				tb.add(entry.getKey(), entry.getValue());
+			MapperColumnDesc desc = null;
+			for (Map.Entry<String, MapperColumnDesc> entry : fieldNameMap.entrySet()) {
+				desc = entry.getValue();
+				if(desc.getType() == String.class && desc.getLength() > 0) {
+					tb.length(desc.getLength());
+				}else if(Number.class.isAssignableFrom(desc.getType()) || desc.getType() == int.class || 
+						desc.getType() == long.class || desc.getType() == short.class || 
+						desc.getType() == double.class || desc.getType() == float.class ) {
+					if(desc.getLength() > 0) {
+						tb.length(desc.getLength());
+					}
+					if(desc.getScales() > 0) {
+						tb.userData(ShapefileDataStore.SONIC_SCALES, desc.getScales());
+					}
+				}
+				tb.add(entry.getKey(), desc.getType());
 			}
 			ds.createSchema(tb.buildFeatureType());
 			ds.setCharset(Charset.forName(charset == null?"UTF-8":charset));
@@ -236,14 +259,14 @@ public class ExportShp<T> {
 		Object value = null;
 		try {
 			SimpleFeature feature = shp.writer.next();
-			for (Map.Entry<String, Class<?>> entry : fieldNameMap.entrySet()) {
+			for (Map.Entry<String, MapperColumnDesc> entry : fieldNameMap.entrySet()) {
 				key = entry.getKey();
 				if (data.get(entry.getKey()) == null) {
 					continue;
 				}
 				value = data.get(entry.getKey());
 				if(stringExceedLengthPolicy != null && value instanceof String) {
-					value = stringExceedLengthPolicy.renderResult((String) value, this.charset);
+					value = stringExceedLengthPolicy.renderResult((String) value, this.charset, entry.getValue().getLength());
 				}
 				if(Objects.equals(this.geoKey, entry.getKey())) {
 					feature.setAttribute(SHAPE_GEO_KEY, value);
@@ -454,5 +477,6 @@ public class ExportShp<T> {
 		
 
 	}
-
 }
+
+

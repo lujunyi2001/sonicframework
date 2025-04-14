@@ -32,7 +32,7 @@ public class TestDto extends BaseDto {
 	private Double dou;
 	@FieldMapper(field = "SHAPE_Length", order = 2)
 	private Double dou2;
-	@FieldMapper(field = "中文字", order = -1)
+	@FieldMapper(field = "中文字a", alias = "中文字2", order = -1)
 	private String chnVal;
 	
 	@FieldMapper(field = "DAT", order = 10, format = "yyyy-MM-dd")

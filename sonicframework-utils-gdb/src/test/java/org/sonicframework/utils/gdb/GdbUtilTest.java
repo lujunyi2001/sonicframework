@@ -43,7 +43,7 @@ public class GdbUtilTest {
 	
 	@Test
 	public void testExtractInfo() {
-		String path = "E:\\test-data\\export\\问题数据圆形.gdb";
+		String path = "E:\\test-data\\export\\2801b55a-e491-4870-ac45-c4906419f9aa.gdb";
 		
 //		MapperContext<TestDto> context = MapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
 		GeoMapperContext<TestDto> context = GeoMapperContext.newInstance(TestDto.class, ()->new TestDto(), type->getDictList(type));
