@@ -15,6 +15,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Inherited
 public @interface DictFillup {
+	String expression() default "";
+	
 	Class<?>[] groups() default{};
 }
 

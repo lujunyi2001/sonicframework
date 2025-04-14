@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 
 import org.sonicframework.context.fillup.DictCodeBindType;
 import org.sonicframework.context.fillup.FillupConst;
+import org.sonicframework.context.fillup.FillupNotMatch;
 
 /**
 * @author lujunyi
@@ -25,6 +26,12 @@ public @interface DictFillupMapper {
 	DictCodeBindType bindType() default DictCodeBindType.VALUE;
 	String split() default "";
 	String outputSplit() default "";
+	
+	FillupNotMatch matchFail() default FillupNotMatch.SKIP;
+	String defaultVal() default "";
+	
+	String label() default "";
+	
 	Class<?>[] groups() default{};
 }
 

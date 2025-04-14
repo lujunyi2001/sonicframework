@@ -1,6 +1,7 @@
 package org.sonicframework.utils.fillup;
 
 import org.sonicframework.context.fillup.DictCodeBindType;
+import org.sonicframework.context.fillup.FillupNotMatch;
 
 /**
 * @author lujunyi
@@ -13,6 +14,9 @@ public class FillupMapperDescVo {
 	private String split;
 	private String outputSplit;
 	private DictCodeBindType bindType;
+	private FillupNotMatch fillupNotMatch;
+	private String defaultVal;
+	private String label;
 	private Class<?>[] groups;
 	
 	public FillupMapperDescVo() {}
@@ -71,6 +75,30 @@ public class FillupMapperDescVo {
 
 	public void setOutputSplit(String outputSplit) {
 		this.outputSplit = outputSplit;
+	}
+
+	public FillupNotMatch getFillupNotMatch() {
+		return fillupNotMatch;
+	}
+
+	public void setFillupNotMatch(FillupNotMatch fillupNotMatch) {
+		this.fillupNotMatch = fillupNotMatch;
+	}
+
+	public String getDefaultVal() {
+		return defaultVal;
+	}
+
+	public void setDefaultVal(String defaultVal) {
+		this.defaultVal = defaultVal;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 }

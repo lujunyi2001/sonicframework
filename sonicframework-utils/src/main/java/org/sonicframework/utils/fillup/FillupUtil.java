@@ -23,7 +23,9 @@ import org.sonicframework.utils.beans.BeanWrapperImpl;
 import org.springframework.beans.BeanWrapper;
 
 import org.sonicframework.context.dto.DictCodeDto;
+import org.sonicframework.context.exception.DataCheckException;
 import org.sonicframework.context.fillup.FillupConst;
+import org.sonicframework.context.fillup.FillupNotMatch;
 import org.sonicframework.context.fillup.annotation.DictFillupMapper;
 import org.sonicframework.context.fillup.annotation.DictFillupMappers;
 
@@ -70,6 +72,9 @@ public class FillupUtil {
 				vo.setSplit(fieldMapper.split());
 				vo.setOutputSplit(fieldMapper.outputSplit());
 				vo.setGroups(fieldMapper.groups());
+				vo.setLabel(fieldMapper.label());
+				vo.setDefaultVal(fieldMapper.defaultVal());
+				vo.setFillupNotMatch(fieldMapper.matchFail());
 				result.add(vo);
 			}
 			
@@ -110,9 +115,7 @@ public class FillupUtil {
 	
 	public static List<FillupMapperDescVo> parseDescByGroups(Class<?> clazz, Class<?>...groups){
 		List<FillupMapperDescVo> parseDesc = parseDesc(clazz);
-		if(ArrayUtils.isEmpty(groups)) {
-			parseDesc = parseDesc.stream().filter(t->ArrayUtils.isEmpty(t.getGroups())).collect(Collectors.toList());
-		}else {
+		if(ArrayUtils.isNotEmpty(groups)) {
 			Predicate<FillupMapperDescVo> predicate = t->{
 				Class<?>[] voGroups = t.getGroups();
 				if(ArrayUtils.isEmpty(voGroups)) {
@@ -130,11 +133,11 @@ public class FillupUtil {
 		return parseDesc;
 	}
 	
-	public static <T>void fillup(T obj, FillupMapperContext<T> context, Class<?>...groups){
+	public static <T>void fillup(Object obj, FillupMapperContext<T> context, Class<?>...groups){
 		if(obj == null) {
 			return ;
 		}
-		Class<?> clazz = obj.getClass();
+		Class<?> clazz = context.getClazz();
 		List<FillupMapperDescVo> descList = parseDescByGroups(clazz, groups);
 		Map<String, DictCodeDto> valueDictCodeMap = new HashMap<>();
 		Map<String, List<DictCodeDto>> valueDictCodeListMap = new HashMap<>();
@@ -156,12 +159,20 @@ public class FillupUtil {
 			Map<String, DictCodeDto> codeMap = context.getDictMapByType(desc.getDictName());
 			if(StringUtils.isEmpty(desc.getSplit())) {
 				dictCodeDto = codeMap.get(code);
+				dictCodeDto = buildDictCodeDto(dictCodeDto, code, desc);
 				if(dictCodeDto == null) {
 					continue;
 				}
 				valueDictCodeMap.put(key, dictCodeDto);
 			}else {
-				dictCodeDtoList = Stream.of(code.split(desc.getSplit())).map(t->codeMap.containsKey(t)?codeMap.get(t):null).filter(t->t != null).collect(Collectors.toList());
+				dictCodeDtoList = Stream.of(code.split(desc.getSplit())).map(t->{
+					DictCodeDto r = codeMap.containsKey(t)?codeMap.get(t):null;
+					r = buildDictCodeDto(r, t, desc);
+					if(r == null) {
+						return null;
+					}
+					return r;
+				}).filter(t->t != null).collect(Collectors.toList());
 				valueDictCodeListMap.put(key, dictCodeDtoList);
 			}
 			
@@ -193,5 +204,17 @@ public class FillupUtil {
 		}
 		
 	}
-
+	
+	private static DictCodeDto buildDictCodeDto(DictCodeDto dto, String code, FillupMapperDescVo desc) {
+		if(dto != null) {
+			return dto;
+		}
+		if(desc.getFillupNotMatch() == FillupNotMatch.EXCEPTION) {
+			throw new DataCheckException(String.format("未找到%scode为%s的字典项", StringUtils.isBlank(desc.getLabel())?desc.getFieldName():desc.getLabel(), code));
+		}else if(desc.getFillupNotMatch() == FillupNotMatch.DEFAULT_VAL) {
+			return desc.getBindType().mock(desc.getDefaultVal());
+		}else {
+			return null;
+		}
+	}
 }
