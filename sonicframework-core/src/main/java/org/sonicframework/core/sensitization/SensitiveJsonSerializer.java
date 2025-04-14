@@ -42,6 +42,9 @@ public class SensitiveJsonSerializer extends JsonSerializer<String> implements C
 	@Override
 	public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 			throws JsonMappingException {
+		if(property == null) {
+			return this;
+		}
 		AnnotatedMember member = property.getMember();
 		String fieldName = property.getName();
 		FieldSensitization annotation = member.getAnnotation(FieldSensitization.class);
@@ -52,7 +55,6 @@ public class SensitiveJsonSerializer extends JsonSerializer<String> implements C
 		return this;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private SensitizationItemVo enableSensitive(String fieldName, FieldSensitization annotation, SensitiveRequestContext context) {
 		if(annotation == null || context == null) {
 			return null;

@@ -1,11 +1,8 @@
 package org.sonicframework.core.config;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -24,11 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -46,14 +39,17 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 /**
@@ -141,36 +137,7 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter() {
-			private StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
-
-			@Override
-			protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage)
-					throws IOException, HttpMessageNotWritableException {
-				if (object instanceof String && type == String.class) {
-					stringConverter.write((String) object, MediaType.TEXT_HTML, outputMessage);
-					return;
-				}
-				super.writeInternal(object, type, outputMessage);
-			}
-		};
-		
-		if(sensitizationConfig.isEnable()) {
-			ObjectMapper objectMapper = converter.getObjectMapper();
-			SimpleModule simpleModule = new SimpleModule();
-			simpleModule.addSerializer(String.class, new SensitiveJsonSerializer());
-			objectMapper.registerModule(simpleModule);
-		}
-		
-		
-		converter.setSupportedMediaTypes(new ArrayList<>(Arrays.asList(MediaType.APPLICATION_JSON,
-				new MediaType("application", "*+json"), MediaType.TEXT_HTML)));
-		converters.add(0, converter);
-	}
-
-	@Override
-	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+		MappingJackson2HttpMessageConverter converter = new SonicMappingJackson2HttpMessageConverter();
 		ObjectMapper objectMapper = converter.getObjectMapper();
 		// 生成JSON时,将所有Long转换成String
 		SimpleModule simpleModule = new SimpleModule();
@@ -196,6 +163,38 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 			});
 		}
 		
+		if(webConfig.isOutNullStrToNull()) {
+			simpleModule.addSerializer(String.class, new StdSerializer<String>(String.class) {
+
+				private static final long serialVersionUID = 7487256268470109798L;
+
+				@Override
+				public void serialize(String value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+					if("null".equalsIgnoreCase(value)) {
+						gen.writeObject(null);
+						return ;
+					}
+					gen.writeString(value);
+				}
+			});
+			simpleModule.addSerializer(String.class, new StdSerializer<String>(String.class) {
+				
+				private static final long serialVersionUID = 7487256268470109798L;
+				
+				@Override
+				public void serialize(String value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+//					if("null".equalsIgnoreCase(value)) {
+//						gen.writeObject(null);
+//						return ;
+//					}
+					gen.writeString(value);
+				}
+			});
+		}
+		if(sensitizationConfig.isEnable()) {
+			simpleModule.addSerializer(String.class, new SensitiveJsonSerializer());
+		}
+		
 		
 		objectMapper.registerModule(simpleModule);
 		// 时间格式化
@@ -204,6 +203,11 @@ public class WebAppConfigurer implements WebMvcConfigurer {
 		// 设置格式化内容
 		converter.setObjectMapper(objectMapper);
 		converters.add(0, converter);
+	}
+	
+	@Override
+	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+		
 	}
 
 	@Override

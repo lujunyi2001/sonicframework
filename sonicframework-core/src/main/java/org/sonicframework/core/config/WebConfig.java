@@ -10,6 +10,7 @@ public class WebConfig {
 
 	private boolean argumentBlankToNull = false;
 	private boolean argumentTrim = false;
+	private boolean outNullStrToNull = false;
 	
 	public WebConfig() {
 	}
@@ -28,6 +29,14 @@ public class WebConfig {
 
 	public void setArgumentBlankToNull(boolean argumentBlankToNull) {
 		this.argumentBlankToNull = argumentBlankToNull;
+	}
+
+	public boolean isOutNullStrToNull() {
+		return outNullStrToNull;
+	}
+
+	public void setOutNullStrToNull(boolean outNullStrToNull) {
+		this.outNullStrToNull = outNullStrToNull;
 	}
 
 
