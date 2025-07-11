@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import org.sonicframework.context.exception.BaseBizException;
 import org.sonicframework.context.exception.DataCheckException;
-import org.sonicframework.context.exception.DataNotValidException;
 import org.sonicframework.context.exception.FileCheckException;
 import org.sonicframework.utils.ConsumerImpEntity;
 import org.sonicframework.utils.ValidateResult;

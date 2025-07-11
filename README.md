@@ -745,3 +745,84 @@ context.setValidEnable(true);
 4. 调用writePageData方法写入数据，参数为org.sonicframework.utils.PageQuerySupport类型，也可以调用write方法写入单条数据
 5. 调用close方法关闭写入
 6. 调用downloadZipAndDelete方法压缩下载并删除源文件，参数为javax.servlet.http.HttpServletResponse类型
+
+## 前后端传输加解密
+采取rsa加密加密
+### 1.开启配置
+``` yaml
+sonicframework:
+  encrypt:
+    enable: true
+```
+### 2.配置秘钥服务
+声明实现org.sonicframework.core.encrypt.RsakeyProviderService的bean，如不声明则默认注入org.sonicframework.core.encrypt.DefaultRsakeyProviderService。
+### 3. 前端加密后端解密
+#### 3.1 对于form-data的请求
+前端通过公钥加密parameter后，需要把加密的parameter名称用“,”连接，再用公钥加密，保存为__encryptKey参数，如需要修改__encryptKey参数名，需要后端增加配置,并将__encryptKey改为需要的parameter名称
+``` yaml
+sonicframework:
+  encrypt:
+    encryptKey: __encryptKey
+```
+对于后端不需要修改代码
+
+#### 3.2 对于RequestBody的请求
+1. 如需要所有接口都需要后端解密RequestBody,则需要开启以下配置，如不需要则不要加
+``` yaml
+sonicframework:
+  encrypt:
+    alwaysDecryptRequestbody: true
+```
+2.如需要单独接口后端解密，则要在controller层的方法上增加org.sonicframework.context.common.annotation.DecryptRequestBody注解，前端对RequestBody加密后后端会自动解密，不需要做任何处理。
+
+### 4. 后端加密前端解密
+1. 如需要所有接口都需要后端加密ResponseBody,则需要开启以下配置，如不需要则不要加
+``` yaml
+sonicframework:
+  encrypt:
+    alwaysEcryptResponsebody: true
+```
+2.如需要单独接口后端加密，则要在controller层的方法上增加org.sonicframework.context.common.annotation.EncryptResponseBody注解，前端对ResponseBody解密解密即可，后端不需要做任何处理。
+
+
+## 数据脱敏
+1. 开启配置
+``` yaml
+sonicframework:
+  sensitization:
+    enable: true
+```
+2. 在数据模型中配置脱敏策略
+在数据模型字段上添加org.sonicframework.context.sensitization.annotation.FieldSensitization注解，注解中的属性如下: 
+- **support**: 脱敏策略
+|类型   |作用   |备注   |
+|------|-------|-------|
+|org.sonicframework.context.sensitization.NullSensitization|字段值设置为null||
+|org.sonicframework.context.sensitization.NoneSensitization|字段值不做任何处理||
+|org.sonicframework.context.sensitization.NormalSensitization|按字符索引替换为特殊字符|需要配置FieldSensitization注解的env属性|
+|org.sonicframework.context.sensitization.FirstFixedPatternSensitization|根据查找字符后面的按照按字符索引替换为特殊字符|需要配置FieldSensitization注解的env属性|
+|org.sonicframework.context.sensitization.LastFixedPatternSensitization|根据查找字符前面的按照按字符索引替换为特殊字符|需要配置FieldSensitization注解的env属性|
+
+- **env**: 策略参数
+类型为org.sonicframework.context.sensitization.annotation.SensitizationEnv注解，包含以下参数: 
+|名称|说明|默认值|
+|---|---|---|
+|start|截取字符串开始索引(左到右的索引)|0|
+|end|截取字符串结束索引(右到左的索引,最右为0)|0|
+|pattern|查找固定字符串匹配值|@|
+|mask|填充字符|*|
+|maskRepeat|是否重复填充|true|
+
+如需要单独处理脱敏策略，需要重新写策略并实现org.sonicframework.context.sensitization.SensitizationSupport接口,并配置到注解中即可
+``` java
+	/**
+	 * 数据脱敏处理方法
+	 * @param val 脱敏前的数据
+	 * @param env 脱敏参数
+	 * @return 脱敏后的数据
+	 */
+	String serializ(String val, Env env);
+```
+- **groups**:分组
+
+3. 在controller层的方法中添加org.sonicframework.context.sensitization.annotation.Sensitization注解(注解支持groups分组，和FieldSensitization注解的groups分组对应)

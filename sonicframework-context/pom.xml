@@ -5,13 +5,41 @@
 	<parent>
 		<groupId>org.sonicframework</groupId>
 		<artifactId>sonicframework-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 
     <artifactId>sonicframework-context</artifactId>
     <name>sonicframework-context</name>
     <description>sonic framework context</description>
+	<url>https://github.com/lujunyi2001/sonicframework</url>
     <packaging>jar</packaging>
+    
+    <scm>
+        <url>https://github.com/lujunyi2001/sonicframework</url>
+        <connection>scm:git:https://github.com/lujunyi2001/sonicframework.git</connection>
+        <developerConnection>scm:git:https://github.com/lujunyi2001/sonicframework.git</developerConnection>
+    </scm>
+    
+    <licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://github.com/lujunyi2001/sonicframework/blob/master/LICENSE</url>
+		</license>
+	</licenses>
+
+    <developers>
+        <developer>
+            <name>lujunyi</name>
+            <email>lujunyi_2001@sina.com</email>
+        </developer>
+    </developers>
+    
+    <dependencies>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+    </dependencies>
 
     <build>
         <resources>

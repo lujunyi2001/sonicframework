@@ -220,7 +220,7 @@ public class ExportShp<T> {
 			MapperColumnDesc desc = null;
 			for (Map.Entry<String, MapperColumnDesc> entry : fieldNameMap.entrySet()) {
 				desc = entry.getValue();
-				if(desc.getType() == String.class && desc.getLength() > 0) {
+				if((desc.getType() == String.class) && desc.getLength() > 0) {
 					tb.length(desc.getLength());
 				}else if(Number.class.isAssignableFrom(desc.getType()) || desc.getType() == int.class || 
 						desc.getType() == long.class || desc.getType() == short.class || 

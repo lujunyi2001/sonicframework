@@ -1,6 +1,7 @@
 package org.sonicframework.core.encrypt;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.sonicframework.core.webapi.service.WebApiResultApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Maps;
 import org.sonicframework.context.exception.DevelopeCodeException;
 import org.sonicframework.utils.JsonUtil;
 import org.sonicframework.utils.encrypt.RSAUtil;
@@ -91,7 +91,7 @@ public class DecryptFilter<T> implements Filter {
     
     private HttpServletRequest buildRequestWrapper(Set<String> set, HttpServletRequest req, ResponseWrapper response) throws IOException {
     	Map<String, String[]> paramMap = req.getParameterMap();
-        Map<String, String[]> paramMap2 = Maps.newHashMap();
+        Map<String, String[]> paramMap2 = new HashMap<>();
 
         if(set == null || set.isEmpty()) {
         	paramMap2.putAll(paramMap); 

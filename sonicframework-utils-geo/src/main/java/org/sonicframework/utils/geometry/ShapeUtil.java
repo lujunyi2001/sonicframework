@@ -50,7 +50,6 @@ import org.sonicframework.utils.mapper.PostMapper;
 
 import org.sonicframework.context.exception.BaseBizException;
 import org.sonicframework.context.exception.DataCheckException;
-import org.sonicframework.context.exception.DataNotValidException;
 import org.sonicframework.context.exception.FileCheckException;
 
 /**

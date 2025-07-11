@@ -9,16 +9,16 @@ public interface SerializeSupport<F, T> {
 	/**
 	 * 导出时序列化
 	 * 
-	 * @param f
-	 * @return
+	 * @param 序列化前的值
+	 * @return 序列化后的值
 	 */
 	T serialize(F f);
 
 	/**
 	 * 导入时序列化
 	 * 
-	 * @param t
-	 * @return
+	 * @param 序列化前的值
+	 * @return 序列化后的值
 	 */
 	F deserialize(T t);
 

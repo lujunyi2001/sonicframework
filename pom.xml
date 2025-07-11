@@ -7,16 +7,40 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.6.RELEASE</version>
+		<version>2.7.18</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.sonicframework</groupId>
 	<artifactId>sonicframework-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>sonicframework-parent</name>
-	<description>sonic framework</description>
+	<description>sonic framework parent</description>
+	<url>https://github.com/lujunyi2001/sonicframework</url>
 	<!-- <packaging>war</packaging> -->
 	<packaging>pom</packaging>
+
+
+	<scm>
+        <url>https://github.com/lujunyi2001/sonicframework</url>
+        <connection>scm:git:https://github.com/lujunyi2001/sonicframework.git</connection>
+        <developerConnection>scm:git:https://github.com/lujunyi2001/sonicframework.git</developerConnection>
+    </scm>
+    
+    <licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://github.com/lujunyi2001/sonicframework/blob/master/LICENSE</url>
+		</license>
+	</licenses>
+
+    <developers>
+        <developer>
+            <name>lujunyi</name>
+            <email>lujunyi_2001@sina.com</email>
+        </developer>
+    </developers>
+	
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -24,15 +48,23 @@
 		<logback.version>1.2.9</logback.version>
 		
 		<poi.version>3.17</poi.version>
+		<commons.lang3.version>3.9</commons.lang3.version>
+		<commons.io.version>2.5</commons.io.version>
+		<commons.collections.version>3.2.2</commons.collections.version>
 	</properties>
-	<modules>
+	<!-- <modules>
 		<module>sonicframework-context</module>
 		<module>sonicframework-utils</module>
 		<module>sonicframework-utils-geo</module>
 		<module>sonicframework-utils-gdb</module>
 		<module>sonicframework-core</module>
-	</modules>
-	
+	</modules> -->
+	<distributionManagement>
+		<repository>
+            <id>central</id>
+            <url>https://central.sonatype.com/</url>
+        </repository>
+	</distributionManagement>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -55,6 +87,21 @@
 				<artifactId>poi-excelant</artifactId>
 				<version>${poi.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons.lang3.version}</version>
+		    </dependency>
+		    <dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons.io.version}</version>
+		    </dependency>
+		    <dependency>
+	            <groupId>commons-collections</groupId>
+	            <artifactId>commons-collections</artifactId>
+	            <version>${commons.collections.version}</version>
+	        </dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -70,7 +117,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>versions-maven-plugin</artifactId>
 			<version>2.8.1</version>
@@ -86,7 +133,7 @@
       				<artifactId>slf4j-jdk14</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 	<build>
 		<plugins>
@@ -96,24 +143,69 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin> -->
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
-			</plugin> -->
+			</plugin>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <!-- 源码包随着项目打成的jar包安装到本地仓库或者私服、公服 -->
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- 禁用严格语法检测 -->
+                    <doclint>none</doclint>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.7</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.7.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -140,5 +232,4 @@
 			</resource>
 		</resources>
 	</build>
-
 </project>

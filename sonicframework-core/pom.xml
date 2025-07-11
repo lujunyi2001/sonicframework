@@ -7,13 +7,34 @@
 	<parent>
 		<groupId>org.sonicframework</groupId>
 		<artifactId>sonicframework-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 
 	<artifactId>sonicframework-core</artifactId>
 	<name>sonicframework-core</name>
 	<description>sonic framework core</description>
+	<url>https://github.com/lujunyi2001/sonicframework</url>
 	<packaging>jar</packaging>
+	
+	<scm>
+        <url>https://github.com/lujunyi2001/sonicframework</url>
+        <connection>scm:git:https://github.com/lujunyi2001/sonicframework.git</connection>
+        <developerConnection>scm:git:https://github.com/lujunyi2001/sonicframework.git</developerConnection>
+    </scm>
+    
+    <licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://github.com/lujunyi2001/sonicframework/blob/master/LICENSE</url>
+		</license>
+	</licenses>
+
+    <developers>
+        <developer>
+            <name>lujunyi</name>
+            <email>lujunyi_2001@sina.com</email>
+        </developer>
+    </developers>
 	
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
@@ -71,6 +92,15 @@
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
 		</dependency>
 	</dependencies>
 
