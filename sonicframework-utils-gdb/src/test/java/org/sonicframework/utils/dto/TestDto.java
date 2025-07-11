@@ -14,11 +14,7 @@ import org.sonicframework.utils.excel.ExcelUtil;
 import org.sonicframework.utils.geometry.ShapeUtil;
 import org.sonicframework.utils.geometry.mapper.serialize.StrGeoSerializeSupport;
 
-import lombok.Getter;
-import lombok.Setter;
 
-@Setter
-@Getter
 @ClassFieldMapper(local = "ext1", other = "EXT1", order = 1)
 @ClassFieldMapper(local = "ext2", other = "EXT2", order = 100)
 public class TestDto extends BaseDto {
@@ -48,4 +44,73 @@ public class TestDto extends BaseDto {
 	@FieldMapper(field = "the_geom", serialize = StrGeoSerializeSupport.class, groups = ShapeUtil.class)
 	@FieldMapper(field = "the_geom")
 	private String geoStr;
+	public String getStr() {
+		return str;
+	}
+	public void setStr(String str) {
+		this.str = str;
+	}
+	public Double getDou() {
+		return dou;
+	}
+	public void setDou(Double dou) {
+		this.dou = dou;
+	}
+	public Double getDou2() {
+		return dou2;
+	}
+	public void setDou2(Double dou2) {
+		this.dou2 = dou2;
+	}
+	public String getChnVal() {
+		return chnVal;
+	}
+	public void setChnVal(String chnVal) {
+		this.chnVal = chnVal;
+	}
+	public Date getDat() {
+		return dat;
+	}
+	public void setDat(Date dat) {
+		this.dat = dat;
+	}
+	public String getExt1() {
+		return ext1;
+	}
+	public void setExt1(String ext1) {
+		this.ext1 = ext1;
+	}
+	public String getExt2() {
+		return ext2;
+	}
+	public void setExt2(String ext2) {
+		this.ext2 = ext2;
+	}
+	public String getExt3() {
+		return ext3;
+	}
+	public void setExt3(String ext3) {
+		this.ext3 = ext3;
+	}
+	public String getSplitStr() {
+		return splitStr;
+	}
+	public void setSplitStr(String splitStr) {
+		this.splitStr = splitStr;
+	}
+	public Geometry getGeo() {
+		return geo;
+	}
+	public void setGeo(Geometry geo) {
+		this.geo = geo;
+	}
+	public String getGeoStr() {
+		return geoStr;
+	}
+	public void setGeoStr(String geoStr) {
+		this.geoStr = geoStr;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 }
