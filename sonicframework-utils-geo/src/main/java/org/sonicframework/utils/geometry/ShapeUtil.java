@@ -352,11 +352,9 @@ public class ShapeUtil {
 		String geoStr = null;
 		try {
 			for (Property property : propertyList) {
-				if(property.getValue() != null) {
-					record = new ShpRecordVo(property.getName().getLocalPart(), property.getValue(), property.getType().getBinding());
-					recordList.add(record);
-					logger.trace("buildShpInfoVo record:[{}]", record);
-				}
+				record = new ShpRecordVo(property.getName().getLocalPart(), property.getValue(), property.getType().getBinding());
+				recordList.add(record);
+				logger.trace("buildShpInfoVo record:[{}]", record);
 				if(property.getValue() != null && Geometry.class.isAssignableFrom(property.getType().getBinding())){
 					Geometry geo = (Geometry) property.getValue();
 					if(context.getCrs() != null) {

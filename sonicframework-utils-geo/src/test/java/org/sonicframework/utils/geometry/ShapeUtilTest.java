@@ -122,7 +122,7 @@ public class ShapeUtilTest {
 	
 	@Test
 	public void testExtractInfoEntity() {
-		String path = "e:\\GHFQ\\";
+		String path = "e:\\aaa\\";
 //		List<String> geoJsonList = ShapeUtil.extractInfoGeoJson(path);
 //		for (String string : geoJsonList) {
 //			System.out.println(string);
