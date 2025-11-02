@@ -5,7 +5,6 @@ import org.sonicframework.core.webapi.service.WebApiResultApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.sonicframework.context.exception.BaseBizException;
-import org.sonicframework.context.webapi.dto.ExceptionStackTraceResultDto;
 import org.sonicframework.context.webapi.dto.ResultDto;
 import org.sonicframework.utils.ClassUtil;
 
@@ -57,9 +56,7 @@ public class DefaultWebApiResultApplyServiceImpl implements WebApiResultApplySer
 	public ResultDto applyByUncaughException(Exception exception) {
 		ResultDto resultDto = apply();
 		if(frameworkConfig.isDebug()) {
-			ExceptionStackTraceResultDto traceResult = new ExceptionStackTraceResultDto();
-			traceResult.setStackTrace(ClassUtil.parseStackTrace(exception));
-			resultDto = traceResult;
+			resultDto.putExtData("stackTrace", ClassUtil.parseStackTrace(exception));
 		}
 		resultDto.setResult(ResultDto.RESULT_EXCEPTION);
 		resultDto.setMessage(exception.toString());
@@ -85,10 +82,8 @@ public class DefaultWebApiResultApplyServiceImpl implements WebApiResultApplySer
 
 	@Override
 	public void fillResultByUncaughException(ResultDto resultDto, Exception exception) {
-		if(frameworkConfig.isDebug() && resultDto instanceof ExceptionStackTraceResultDto) {
-			ExceptionStackTraceResultDto traceResult = (ExceptionStackTraceResultDto) resultDto;
-			traceResult.setStackTrace(ClassUtil.parseStackTrace(exception));
-			resultDto = traceResult;
+		if(frameworkConfig.isDebug()) {
+			resultDto.putExtData("stackTrace", ClassUtil.parseStackTrace(exception));
 		}
 		resultDto.setResult(ResultDto.RESULT_EXCEPTION);
 		resultDto.setMessage(exception.toString());

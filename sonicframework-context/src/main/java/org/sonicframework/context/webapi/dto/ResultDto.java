@@ -1,8 +1,12 @@
 package org.sonicframework.context.webapi.dto;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
 /**
  * @author 卢俊毅
@@ -25,6 +29,8 @@ public class ResultDto implements Serializable {
 	private int result = RESULT_SUCCESS;
 	private String message;
 	private Object data;
+	
+	private Map<String, Object> extResultData = new LinkedHashMap<>();
 	
 	public ResultDto() {
 	}
@@ -53,11 +59,19 @@ public class ResultDto implements Serializable {
 	public Object getData() {
 		return data;
 	}
-	public void setData(Object data) {
+	public void setData(Object data) {//stackTrace
 		this.data = data;
 	}
 	@Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this);
     }
+	
+	public void putExtData(String key, Object obj) {
+		this.extResultData.put(key, obj);
+	}
+	@JsonAnyGetter
+	public Map<String, Object> getExtResultData() {
+		return extResultData;
+	}
 }
