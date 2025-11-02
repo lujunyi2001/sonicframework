@@ -12,7 +12,7 @@
 	</parent>
 	<groupId>org.sonicframework</groupId>
 	<artifactId>sonicframework-parent</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<name>sonicframework-parent</name>
 	<description>sonic framework parent</description>
 	<url>https://github.com/lujunyi2001/sonicframework</url>
@@ -51,6 +51,7 @@
 		<commons.lang3.version>3.9</commons.lang3.version>
 		<commons.io.version>2.5</commons.io.version>
 		<commons.collections.version>3.2.2</commons.collections.version>
+		<sonicframework.version>1.1.0</sonicframework.version>
 	</properties>
 	<!-- <modules>
 		<module>sonicframework-context</module>
@@ -102,6 +103,31 @@
 	            <artifactId>commons-collections</artifactId>
 	            <version>${commons.collections.version}</version>
 	        </dependency>
+	        <dependency>
+				<groupId>org.sonicframework</groupId>
+				<artifactId>sonicframework-context</artifactId>
+				<version>${sonicframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.sonicframework</groupId>
+				<artifactId>sonicframework-utils</artifactId>
+				<version>${sonicframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.sonicframework</groupId>
+				<artifactId>sonicframework-core</artifactId>
+				<version>${sonicframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.sonicframework</groupId>
+				<artifactId>sonicframework-utils-geo</artifactId>
+				<version>${sonicframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.sonicframework</groupId>
+				<artifactId>sonicframework-utils-gdb</artifactId>
+				<version>${sonicframework.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.sonicframework</groupId>
 		<artifactId>sonicframework-parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.1.0</version>
 	</parent>
 	<artifactId>sonicframework-utils-geo</artifactId>
 	<name>sonicframework-utils-geo</name>
@@ -46,8 +46,6 @@
 		<dependency>
 			<groupId>org.sonicframework</groupId>
 			<artifactId>sonicframework-utils</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>compile</scope>
 		</dependency>
 		
 		<dependency>

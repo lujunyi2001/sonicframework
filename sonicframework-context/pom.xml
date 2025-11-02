@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.sonicframework</groupId>
 		<artifactId>sonicframework-parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.1.0</version>
 	</parent>
 
     <artifactId>sonicframework-context</artifactId>
@@ -39,6 +39,10 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+	    </dependency>
     </dependencies>
 
     <build>
